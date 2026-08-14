@@ -1,0 +1,5542 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+  <base target="_top">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+  >
+
+  <title>LBC-RPC PORTAL</title>
+
+  <!-- =====================================================
+       TESSERACT.JS
+       OCR RUNS DIRECTLY IN THE BROWSER
+       ===================================================== -->
+
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+
+
+  <style>
+
+    * {
+      box-sizing: border-box;
+    }
+
+
+    body {
+
+      margin: 0;
+
+      font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+      background: #f4f7fb;
+
+      color: #1f2937;
+
+    }
+
+
+    /* =====================================================
+       HEADER
+       ===================================================== */
+
+    .header {
+
+      background: #0878c9;
+
+      color: white;
+
+      padding: 16px 24px;
+
+      display: flex;
+
+      align-items: center;
+
+      justify-content: space-between;
+
+      box-shadow:
+        0 2px 8px rgba(0,0,0,0.15);
+
+    }
+
+
+    .brand {
+
+      display: flex;
+
+      align-items: center;
+
+      gap: 14px;
+
+    }
+
+
+    .logo {
+
+      width: 55px;
+
+      height: 55px;
+
+      border-radius: 10px;
+
+      object-fit: contain;
+
+      background: white;
+
+      padding: 4px;
+
+    }
+
+
+    .title {
+
+      font-size: 24px;
+
+      font-weight: 700;
+
+      letter-spacing: .4px;
+
+    }
+
+
+    .subtitle {
+
+      font-size: 13px;
+
+      margin-top: 3px;
+
+      opacity: .9;
+
+    }
+
+
+    /* =====================================================
+       NAVIGATION
+       ===================================================== */
+
+    .navigation {
+
+      background: white;
+
+      border-bottom:
+        1px solid #dbe3ec;
+
+      display: flex;
+
+      justify-content: center;
+
+      gap: 5px;
+
+      padding: 10px;
+
+      position: sticky;
+
+      top: 0;
+
+      z-index: 50;
+
+    }
+
+
+    .nav-button {
+
+      border: none;
+
+      background: transparent;
+
+      padding: 13px 22px;
+
+      border-radius: 8px;
+
+      font-size: 14px;
+
+      font-weight: 600;
+
+      color: #52606d;
+
+      cursor: pointer;
+
+    }
+
+
+    .nav-button:hover {
+
+      background: #eef6fd;
+
+      color: #0878c9;
+
+    }
+
+
+    .nav-button.active {
+
+      background: #0878c9;
+
+      color: white;
+
+    }
+
+
+    /* =====================================================
+       CONTAINER
+       ===================================================== */
+
+    .container {
+
+      width: 100%;
+
+      max-width: 1200px;
+
+      margin: auto;
+
+      padding: 25px;
+
+    }
+
+
+    .section {
+
+      display: none;
+
+    }
+
+
+    .section.active {
+
+      display: block;
+
+    }
+
+
+    .page-title {
+
+      margin-bottom: 20px;
+
+    }
+
+
+    .page-title h1 {
+
+      margin: 0;
+
+      font-size: 24px;
+
+    }
+
+
+    .page-title p {
+
+      margin: 7px 0 0;
+
+      color: #6b7280;
+
+      font-size: 14px;
+
+    }
+
+
+    /* =====================================================
+       REPORT ID
+       ===================================================== */
+
+    .report-id-box {
+
+      background:
+        linear-gradient(
+          135deg,
+          #0878c9,
+          #0b65a4
+        );
+
+      color: white;
+
+      border-radius: 12px;
+
+      padding: 20px;
+
+      margin-bottom: 20px;
+
+      box-shadow:
+        0 4px 12px rgba(0,0,0,.10);
+
+    }
+
+
+    .report-id-label {
+
+      font-size: 12px;
+
+      text-transform: uppercase;
+
+      opacity: .85;
+
+      margin-bottom: 6px;
+
+    }
+
+
+    .report-id {
+
+      font-size: 22px;
+
+      font-weight: 700;
+
+      letter-spacing: 1px;
+
+    }
+
+
+    /* =====================================================
+       PANEL
+       ===================================================== */
+
+    .panel {
+
+      background: white;
+
+      border:
+        1px solid #e1e8ef;
+
+      border-radius: 12px;
+
+      padding: 25px;
+
+      margin-bottom: 20px;
+
+      box-shadow:
+        0 3px 10px rgba(0,0,0,.05);
+
+    }
+
+
+    .panel-title {
+
+      font-size: 17px;
+
+      font-weight: 700;
+
+      color: #0878c9;
+
+      margin-bottom: 20px;
+
+      padding-bottom: 10px;
+
+      border-bottom:
+        1px solid #edf1f5;
+
+    }
+
+
+    /* =====================================================
+       FORM
+       ===================================================== */
+
+    .form-grid {
+
+      display: grid;
+
+      grid-template-columns:
+        repeat(2, 1fr);
+
+      gap: 18px;
+
+    }
+
+
+    .form-group {
+
+      display: flex;
+
+      flex-direction: column;
+
+    }
+
+
+    .form-group.full {
+
+      grid-column:
+        1 / -1;
+
+    }
+
+
+    label {
+
+      font-size: 13px;
+
+      font-weight: 600;
+
+      margin-bottom: 7px;
+
+      color: #374151;
+
+    }
+
+
+    input,
+    select {
+
+      width: 100%;
+
+      height: 44px;
+
+      border:
+        1px solid #cfd8e3;
+
+      border-radius: 7px;
+
+      padding:
+        0 12px;
+
+      font-size: 14px;
+
+      background: white;
+
+      outline: none;
+
+    }
+
+
+    input:focus,
+    select:focus {
+
+      border-color: #0878c9;
+
+      box-shadow:
+        0 0 0 2px
+        rgba(8,120,201,.10);
+
+    }
+
+
+    input[readonly] {
+
+      background: #f5f7fa;
+
+      color: #56616f;
+
+    }
+
+
+    .required {
+
+      color: #dc2626;
+
+    }
+
+
+    /* =====================================================
+       AREA
+       HIDDEN ON ALL DEVICES
+       ===================================================== */
+
+    .area-field {
+
+      display: none !important;
+
+    }
+
+
+    /* =====================================================
+       CARD CAPTURE
+       ===================================================== */
+
+    .capture-area {
+
+      border:
+        2px dashed #b9c9d8;
+
+      border-radius: 12px;
+
+      padding: 30px 20px;
+
+      text-align: center;
+
+      background: #fafcfe;
+
+    }
+
+
+    .capture-icon {
+
+      font-size: 48px;
+
+      margin-bottom: 10px;
+
+    }
+
+
+    .capture-title {
+
+      font-size: 17px;
+
+      font-weight: 700;
+
+      margin-bottom: 6px;
+
+    }
+
+
+    .capture-description {
+
+      color: #6b7280;
+
+      font-size: 13px;
+
+      margin-bottom: 20px;
+
+    }
+
+
+    .capture-buttons {
+
+      display: flex;
+
+      justify-content: center;
+
+      gap: 10px;
+
+      flex-wrap: wrap;
+
+    }
+
+
+    .button {
+
+      border: none;
+
+      border-radius: 7px;
+
+      padding: 12px 18px;
+
+      font-size: 14px;
+
+      font-weight: 600;
+
+      cursor: pointer;
+
+    }
+
+
+    .button-primary {
+
+      background: #0878c9;
+
+      color: white;
+
+    }
+
+
+    .button-primary:hover {
+
+      background: #066aaa;
+
+    }
+
+
+    .button-secondary {
+
+      background: #eef3f7;
+
+      color: #334155;
+
+    }
+
+
+    .button-secondary:hover {
+
+      background: #e1e8ef;
+
+    }
+
+
+    .button-success {
+
+      background: #168a4a;
+
+      color: white;
+
+    }
+
+
+    .button-success:hover {
+
+      background: #11733d;
+
+    }
+
+
+    .button-danger {
+
+      background: #dc3545;
+
+      color: white;
+
+    }
+
+
+    .button-danger:hover {
+
+      background: #bb2d3b;
+
+    }
+
+
+    #imageInput {
+
+      display: none;
+
+    }
+
+
+    .preview-container {
+
+      display: none;
+
+      margin-top: 20px;
+
+    }
+
+
+    .preview-container.show {
+
+      display: block;
+
+    }
+
+
+    .preview-image {
+
+      max-width: 100%;
+
+      max-height: 400px;
+
+      border-radius: 8px;
+
+      border:
+        1px solid #d7dee7;
+
+    }
+
+
+    /* =====================================================
+       OCR
+       ===================================================== */
+
+    .ocr-section {
+
+      margin-top: 20px;
+
+    }
+
+
+    .ocr-status {
+
+      font-size: 13px;
+
+      color: #64748b;
+
+      margin-bottom: 10px;
+
+    }
+
+
+    .ocr-progress {
+
+      width: 100%;
+
+      height: 8px;
+
+      background: #e8edf2;
+
+      border-radius: 20px;
+
+      overflow: hidden;
+
+      display: none;
+
+      margin-bottom: 15px;
+
+    }
+
+
+    .ocr-progress.show {
+
+      display: block;
+
+    }
+
+
+    .ocr-progress-bar {
+
+      height: 100%;
+
+      width: 0%;
+
+      background: #0878c9;
+
+      transition: width .2s;
+
+    }
+
+
+    .card-number-input {
+
+      font-size: 20px;
+
+      font-weight: 700;
+
+      letter-spacing: 2px;
+
+      text-align: center;
+
+    }
+
+
+    .ocr-note {
+
+      margin-top: 8px;
+
+      color: #6b7280;
+
+      font-size: 12px;
+
+    }
+
+
+    /* =====================================================
+       TURN OVER
+       ===================================================== */
+
+    .turnover-options {
+
+      display: grid;
+
+      grid-template-columns:
+        repeat(2, 1fr);
+
+      gap: 15px;
+
+    }
+
+
+    .turnover-option {
+
+      position: relative;
+
+    }
+
+
+    .turnover-option input {
+
+      display: none;
+
+    }
+
+
+    .turnover-label {
+
+      display: block;
+
+      padding: 18px;
+
+      border:
+        2px solid #dce4ec;
+
+      border-radius: 10px;
+
+      cursor: pointer;
+
+      text-align: center;
+
+      font-weight: 700;
+
+      color: #52606d;
+
+      transition: .2s;
+
+    }
+
+
+    .turnover-label:hover {
+
+      border-color: #0878c9;
+
+    }
+
+
+    .turnover-option input:checked
+    + .turnover-label {
+
+      border-color: #0878c9;
+
+      background: #eef7fd;
+
+      color: #0878c9;
+
+    }
+
+
+    .destination-box {
+
+      display: none;
+
+      margin-top: 20px;
+
+    }
+
+
+    .destination-box.show {
+
+      display: block;
+
+    }
+
+
+    /* =====================================================
+       SUBMIT
+       ===================================================== */
+
+    .submit-area {
+
+      display: flex;
+
+      justify-content: flex-end;
+
+      gap: 10px;
+
+      margin-top: 20px;
+
+    }
+
+
+    .submit-button {
+
+      min-width: 220px;
+
+      height: 48px;
+
+      font-size: 15px;
+
+    }
+
+
+    /* =====================================================
+       LOADING
+       ===================================================== */
+
+    .loading-overlay {
+
+      position: fixed;
+
+      inset: 0;
+
+      background:
+        rgba(255,255,255,.90);
+
+      display: none;
+
+      align-items: center;
+
+      justify-content: center;
+
+      z-index: 1000;
+
+    }
+
+
+    .loading-overlay.show {
+
+      display: flex;
+
+    }
+
+
+    .loading-box {
+
+      background: white;
+
+      padding: 30px;
+
+      border-radius: 12px;
+
+      box-shadow:
+        0 8px 30px rgba(0,0,0,.18);
+
+      text-align: center;
+
+      width: 330px;
+
+    }
+
+
+    .spinner {
+
+      width: 42px;
+
+      height: 42px;
+
+      border:
+        4px solid #e5e7eb;
+
+      border-top-color:
+        #0878c9;
+
+      border-radius: 50%;
+
+      animation:
+        spin .8s linear infinite;
+
+      margin:
+        0 auto 15px;
+
+    }
+
+
+    @keyframes spin {
+
+      to {
+        transform: rotate(360deg);
+      }
+
+    }
+
+
+    /* =====================================================
+       SUCCESS / ERROR
+       ===================================================== */
+
+    .success-box {
+
+      display: none;
+
+      background: #ecfdf3;
+
+      border:
+        1px solid #a7e8c3;
+
+      color: #166534;
+
+      border-radius: 10px;
+
+      padding: 18px;
+
+      margin-bottom: 20px;
+
+    }
+
+
+    .success-box.show {
+
+      display: block;
+
+    }
+
+
+    .error-box {
+
+      display: none;
+
+      background: #fff1f2;
+
+      border:
+        1px solid #fecdd3;
+
+      color: #9f1239;
+
+      border-radius: 10px;
+
+      padding: 18px;
+
+      margin-bottom: 20px;
+
+    }
+
+
+    .error-box.show {
+
+      display: block;
+
+    }
+
+
+    /* =====================================================
+       PLACEHOLDER
+       ===================================================== */
+
+    .placeholder {
+
+      text-align: center;
+
+      padding: 60px 20px;
+
+      color: #64748b;
+
+    }
+
+
+    .placeholder-icon {
+
+      font-size: 50px;
+
+      margin-bottom: 15px;
+
+    }
+
+
+    /* =====================================================
+       FOOTER
+       ===================================================== */
+
+    footer {
+
+      text-align: center;
+
+      padding: 25px;
+
+      color: #7b8794;
+
+      font-size: 12px;
+
+    }
+
+
+    /* =====================================================
+       MULTI-CARD REPORTING
+       ===================================================== */
+
+    .card-list {
+
+      display:flex;
+
+      flex-direction:column;
+
+      gap:18px;
+
+    }
+
+
+    .card-item {
+
+      border:
+        1px solid #dbe3ec;
+
+      border-radius:12px;
+
+      padding:20px;
+
+      background:#fbfdff;
+
+    }
+
+
+    .card-item-header {
+
+      display:flex;
+
+      align-items:center;
+
+      justify-content:space-between;
+
+      gap:10px;
+
+      margin-bottom:15px;
+
+    }
+
+
+    .card-item-title {
+
+      font-weight:700;
+
+      color:#0878c9;
+
+    }
+
+
+    .card-actions {
+
+      display:flex;
+
+      gap:8px;
+
+      flex-wrap:wrap;
+
+    }
+
+
+    .card-preview-wrap {
+
+      margin-top:15px;
+
+      text-align:center;
+
+    }
+
+
+    .card-preview {
+
+      max-width:100%;
+
+      max-height:360px;
+
+      border-radius:8px;
+
+      border:
+        1px solid #d7dee7;
+
+    }
+
+
+    .card-empty {
+
+      padding:28px 15px;
+
+      border:
+        2px dashed #b9c9d8;
+
+      border-radius:10px;
+
+      color:#64748b;
+
+      text-align:center;
+
+      background:#fff;
+
+    }
+
+
+    .remove-card {
+
+      padding:8px 12px;
+
+      font-size:12px;
+
+    }
+
+
+    .add-card-area {
+
+      margin-top:15px;
+
+      display:flex;
+
+      justify-content:center;
+
+    }
+
+
+    .card-bottom-actions {
+
+      display:flex;
+
+      justify-content:center;
+
+      align-items:center;
+
+      gap:10px;
+
+      flex-wrap:wrap;
+
+      margin-top:15px;
+
+    }
+
+
+    /* =====================================================
+       LIVE CAMERA CAPTURE
+       ===================================================== */
+
+    .camera-modal {
+
+      position:fixed;
+
+      inset:0;
+
+      background:rgba(0,0,0,.78);
+
+      display:none;
+
+      align-items:center;
+
+      justify-content:center;
+
+      z-index:10000;
+
+      padding:20px;
+
+    }
+
+
+    .camera-modal.show {
+
+      display:flex;
+
+    }
+
+
+    .camera-box {
+
+      width:min(720px, 100%);
+
+      background:#fff;
+
+      border-radius:14px;
+
+      padding:18px;
+
+      box-shadow:
+        0 20px 60px rgba(0,0,0,.35);
+
+    }
+
+
+    .camera-header {
+
+      display:flex;
+
+      justify-content:space-between;
+
+      align-items:center;
+
+      gap:12px;
+
+      margin-bottom:12px;
+
+    }
+
+
+    .camera-title {
+
+      font-weight:700;
+
+      color:#0878c9;
+
+    }
+
+
+    .camera-video {
+
+      display:block;
+
+      width:100%;
+
+      max-height:65vh;
+
+      object-fit:contain;
+
+      background:#111;
+
+      border-radius:10px;
+
+    }
+
+
+    .camera-controls {
+
+      display:flex;
+
+      justify-content:center;
+
+      gap:10px;
+
+      flex-wrap:wrap;
+
+      margin-top:14px;
+
+    }
+
+
+    .camera-hint {
+
+      margin-top:10px;
+
+      font-size:12px;
+
+      color:#64748b;
+
+      text-align:center;
+
+    }
+
+
+    .validation-row {
+
+      display:flex;
+
+      align-items:center;
+
+      justify-content:center;
+
+      gap:10px;
+
+      flex-wrap:wrap;
+
+      margin-top:12px;
+
+    }
+
+
+    .validation-badge {
+
+      font-size:12px;
+
+      font-weight:700;
+
+      padding:7px 10px;
+
+      border-radius:20px;
+
+      background:#eef3f7;
+
+      color:#64748b;
+
+    }
+
+
+    .validation-badge.valid {
+
+      background:#e8f7ee;
+
+      color:#168a4a;
+
+    }
+
+
+    .validation-badge.invalid {
+
+      background:#fff0f0;
+
+      color:#dc3545;
+
+    }
+
+
+    /* =====================================================
+       MOBILE PHONE
+       GOOGLE-FORM STYLE / LARGE READABLE
+       ===================================================== */
+
+    @media screen and (max-width: 800px) {
+
+      body {
+
+        font-size:16px;
+
+        background:#f4f7fb;
+
+      }
+
+
+      /* HEADER */
+
+      .header {
+
+        padding:14px 16px;
+
+      }
+
+
+      .brand {
+
+        gap:11px;
+
+      }
+
+
+      .logo {
+
+        width:48px;
+
+        height:48px;
+
+      }
+
+
+      .title {
+
+        font-size:20px;
+
+        line-height:1.25;
+
+      }
+
+
+      .subtitle {
+
+        font-size:13px;
+
+        margin-top:4px;
+
+      }
+
+
+      /* NAVIGATION */
+
+      .navigation {
+
+        justify-content:flex-start;
+
+        overflow-x:auto;
+
+        gap:6px;
+
+        padding:9px 10px;
+
+        -webkit-overflow-scrolling:touch;
+
+      }
+
+
+      .nav-button {
+
+        flex:0 0 auto;
+
+        min-height:46px;
+
+        padding:11px 15px;
+
+        font-size:14px;
+
+        white-space:nowrap;
+
+      }
+
+
+      /* CONTAINER */
+
+      .container {
+
+        width:100%;
+
+        max-width:100%;
+
+        padding:18px 14px;
+
+      }
+
+
+      /* PAGE TITLE */
+
+      .page-title {
+
+        margin-bottom:18px;
+
+      }
+
+
+      .page-title h1 {
+
+        font-size:24px;
+
+        line-height:1.25;
+
+      }
+
+
+      .page-title p {
+
+        font-size:15px;
+
+        line-height:1.5;
+
+      }
+
+
+      /* PANELS */
+
+      .panel {
+
+        width:100%;
+
+        padding:18px 15px;
+
+        margin-bottom:18px;
+
+        border-radius:12px;
+
+      }
+
+
+      .panel-title {
+
+        font-size:18px;
+
+        line-height:1.35;
+
+        margin-bottom:18px;
+
+        padding-bottom:11px;
+
+      }
+
+
+      /* REPORT ID */
+
+      .report-id-box {
+
+        padding:18px;
+
+        margin-bottom:18px;
+
+      }
+
+
+      .report-id-label {
+
+        font-size:13px;
+
+      }
+
+
+      .report-id {
+
+        font-size:22px;
+
+        line-height:1.35;
+
+      }
+
+
+      /* STRICT ONE COLUMN */
+
+      .form-grid {
+
+        display:grid !important;
+
+        grid-template-columns:1fr !important;
+
+        gap:16px !important;
+
+        width:100%;
+
+      }
+
+
+      .form-group {
+
+        width:100%;
+
+        display:flex;
+
+        flex-direction:column;
+
+      }
+
+
+      .form-group.full {
+
+        grid-column:auto !important;
+
+      }
+
+
+      /* LABELS */
+
+      label {
+
+        font-size:16px;
+
+        line-height:1.4;
+
+        font-weight:700;
+
+        margin-bottom:8px;
+
+        color:#263342;
+
+      }
+
+
+      .required {
+
+        font-size:16px;
+
+      }
+
+
+      /* INPUTS / SELECTS */
+
+      input,
+      select {
+
+        width:94%;
+
+        max-width:94%;
+
+        height:50px;
+
+        padding:0 13px;
+
+        font-size:16px;
+
+        line-height:1.4;
+
+        border-radius:8px;
+
+        border:1px solid #c7d2de;
+
+      }
+
+
+      input::placeholder {
+
+        font-size:15px;
+
+        color:#7a8794;
+
+      }
+
+
+      select {
+
+        font-size:16px;
+
+      }
+
+
+      input[readonly] {
+
+        background:#f3f5f7;
+
+      }
+
+
+      /* STORE / REPORT INFORMATION */
+
+      #storeCode,
+      #storeName,
+      #submittedBy {
+
+        width:94%;
+
+        max-width:94%;
+
+      }
+
+
+      /* AREA MUST ALWAYS BE HIDDEN */
+
+      .area-field {
+
+        display:none !important;
+
+      }
+
+
+      /* TURNOVER ONE COLUMN */
+
+      .turnover-options {
+
+        display:grid !important;
+
+        grid-template-columns:1fr !important;
+
+        gap:12px;
+
+        width:100%;
+
+      }
+
+
+      .turnover-option {
+
+        width:100%;
+
+      }
+
+
+      .turnover-label {
+
+        width:94%;
+
+        padding:17px 14px;
+
+        min-height:56px;
+
+        display:flex;
+
+        align-items:center;
+
+        justify-content:center;
+
+        font-size:16px;
+
+        line-height:1.3;
+
+        border-radius:9px;
+
+      }
+
+
+      /* DESTINATION */
+
+      .destination-box {
+
+        margin-top:18px;
+
+      }
+
+
+      .destination-box .form-grid {
+
+        grid-template-columns:1fr !important;
+
+      }
+
+
+      /* CARD LIST */
+
+      .card-list {
+
+        gap:16px;
+
+      }
+
+
+      .card-item {
+
+        padding:15px;
+
+        border-radius:11px;
+
+      }
+
+
+      .card-item-header {
+
+        flex-direction:column;
+
+        align-items:flex-start;
+
+        gap:12px;
+
+      }
+
+
+      .card-item-title {
+
+        font-size:18px;
+
+      }
+
+
+      .card-actions {
+
+        width:94%;
+
+        display:grid;
+
+        grid-template-columns:1fr;
+
+        gap:9px;
+
+      }
+
+
+      .card-actions .button {
+
+        width:100%;
+
+      }
+
+
+      /* CARD PREVIEW */
+
+      .card-preview-wrap {
+
+        margin-top:15px;
+
+      }
+
+
+      .card-preview {
+
+        width:94%;
+
+        max-width:94%;
+
+        max-height:300px;
+
+        object-fit:contain;
+
+      }
+
+
+      /* OCR */
+
+      .ocr-section {
+
+        margin-top:20px;
+
+      }
+
+
+      .ocr-section label {
+
+        font-size:16px;
+
+      }
+
+
+      .card-number-input {
+
+        width:94%;
+
+        max-width:94%;
+
+        height:54px;
+
+        font-size:19px;
+
+        font-weight:700;
+
+        letter-spacing:2px;
+
+        text-align:center;
+
+      }
+
+
+      .ocr-status {
+
+        width:94%;
+
+        font-size:14px;
+
+        line-height:1.5;
+
+        margin-top:9px;
+
+      }
+
+
+      .ocr-note {
+
+        width:94%;
+
+        font-size:14px;
+
+        line-height:1.5;
+
+      }
+
+
+      .ocr-progress {
+
+        width:94%;
+
+        height:9px;
+
+      }
+
+
+      /* VALIDATION */
+
+      .validation-row {
+
+        width:94%;
+
+        flex-direction:column;
+
+        align-items:stretch;
+
+        gap:9px;
+
+      }
+
+
+      .validation-row .button {
+
+        width:100%;
+
+        min-height:50px;
+
+        font-size:15px;
+
+      }
+
+
+      .validation-badge {
+
+        width:100%;
+
+        text-align:center;
+
+        font-size:14px;
+
+        padding:9px;
+
+      }
+
+
+      /* CARD BOTTOM ACTIONS */
+
+      .card-bottom-actions {
+
+        width:94%;
+
+        display:grid;
+
+        grid-template-columns:1fr;
+
+        gap:10px;
+
+        margin:16px auto 0;
+
+      }
+
+
+      .card-bottom-actions .button {
+
+        width:100%;
+
+        min-height:50px;
+
+        font-size:15px;
+
+      }
+
+
+      /* GENERAL BUTTONS */
+
+      .button {
+
+        min-height:50px;
+
+        padding:12px 16px;
+
+        font-size:15px;
+
+        line-height:1.3;
+
+        border-radius:8px;
+
+      }
+
+
+      /* SUBMIT */
+
+      .submit-area {
+
+        width:94%;
+
+        margin:20px auto 0;
+
+        display:grid;
+
+        grid-template-columns:1fr;
+
+        gap:10px;
+
+      }
+
+
+      .submit-area .button {
+
+        width:100%;
+
+        min-height:52px;
+
+      }
+
+
+      .submit-button {
+
+        width:100%;
+
+        min-width:0;
+
+        height:52px;
+
+        font-size:16px;
+
+      }
+
+
+      /* SUCCESS / ERROR */
+
+      .success-box,
+      .error-box {
+
+        width:100%;
+
+        padding:16px;
+
+        font-size:15px;
+
+        line-height:1.55;
+
+      }
+
+
+      /* PLACEHOLDER */
+
+      .placeholder {
+
+        padding:45px 15px;
+
+      }
+
+
+      .placeholder-icon {
+
+        font-size:46px;
+
+      }
+
+
+      .placeholder h2 {
+
+        font-size:21px;
+
+        line-height:1.35;
+
+      }
+
+
+      .placeholder p {
+
+        font-size:15px;
+
+        line-height:1.55;
+
+      }
+
+
+      /* CAMERA */
+
+      .camera-modal {
+
+        padding:10px;
+
+      }
+
+
+      .camera-box {
+
+        width:100%;
+
+        padding:14px;
+
+        border-radius:12px;
+
+      }
+
+
+      .camera-title {
+
+        font-size:16px;
+
+      }
+
+
+      .camera-video {
+
+        max-height:60vh;
+
+      }
+
+
+      .camera-controls {
+
+        display:grid;
+
+        grid-template-columns:1fr;
+
+        gap:9px;
+
+      }
+
+
+      .camera-controls .button {
+
+        width:100%;
+
+        min-height:50px;
+
+      }
+
+
+      .camera-hint {
+
+        font-size:14px;
+
+        line-height:1.5;
+
+      }
+
+
+      /* LOADING */
+
+      .loading-box {
+
+        width:88%;
+
+        max-width:350px;
+
+        padding:25px 20px;
+
+      }
+
+
+      #loadingText {
+
+        font-size:17px;
+
+      }
+
+
+      #loadingSubtext {
+
+        font-size:14px !important;
+
+        line-height:1.5;
+
+      }
+
+
+      /* FOOTER */
+
+      footer {
+
+        padding:22px 15px;
+
+        font-size:13px;
+
+      }
+
+    }
+
+
+    /* =====================================================
+       VERY SMALL PHONES
+       ===================================================== */
+
+    @media screen and (max-width:380px) {
+
+      .container {
+
+        padding:15px 11px;
+
+      }
+
+
+      .panel {
+
+        padding:16px 13px;
+
+      }
+
+
+      .title {
+
+        font-size:18px;
+
+      }
+
+
+      .page-title h1 {
+
+        font-size:22px;
+
+      }
+
+
+      label {
+
+        font-size:15px;
+
+      }
+
+
+      input,
+      select {
+
+        width:92%;
+
+        max-width:92%;
+
+        font-size:16px;
+
+      }
+
+
+      .button {
+
+        font-size:14px;
+
+      }
+
+
+      .card-number-input {
+
+        font-size:17px;
+
+      }
+
+    }
+
+  </style>
+
+</head>
+
+
+<body>
+
+
+<!-- =====================================================
+     HEADER
+     ===================================================== -->
+
+<header class="header">
+
+  <div class="brand">
+
+    <img
+      id="companyLogo"
+      class="logo"
+      style="display:none;"
+      alt="Company Logo"
+    >
+
+    <div
+      id="logoPlaceholder"
+      class="logo"
+      style="
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        color:#0878c9;
+        font-weight:700;
+        font-size:24px;
+      "
+    >
+      L
+    </div>
+
+
+    <div>
+
+      <div class="title">
+        LBC-RPC PORTAL
+      </div>
+
+      <div class="subtitle">
+        Store Dashboard
+      </div>
+
+    </div>
+
+  </div>
+
+</header>
+
+
+<!-- =====================================================
+     NAVIGATION
+     ===================================================== -->
+
+<nav class="navigation">
+
+  <button
+    id="navReporting"
+    class="nav-button active"
+    onclick="showSection('reporting', this)"
+  >
+    📋 LBC-RPC REPORTING
+  </button>
+
+
+  <button
+    class="nav-button"
+    onclick="showSection('locate', this)"
+  >
+    🔍 LOCATE CARD
+  </button>
+
+
+  <button
+    class="nav-button"
+    onclick="showSection('release', this)"
+  >
+    📦 RELEASE CARD
+  </button>
+
+</nav>
+
+
+<!-- =====================================================
+     MAIN
+     ===================================================== -->
+
+<main class="container">
+
+
+<!-- =====================================================
+     REPORTING SECTION
+     ===================================================== -->
+
+<section
+  id="reporting"
+  class="section active"
+>
+
+
+  <div class="page-title">
+
+    <h1>
+      LBC-RPC REPORTING
+    </h1>
+
+    <p>
+      Report a card left by a customer and record its
+      turn-over destination.
+    </p>
+
+  </div>
+
+
+  <!-- SUCCESS -->
+
+  <div
+    id="successBox"
+    class="success-box"
+  ></div>
+
+
+  <!-- ERROR -->
+
+  <div
+    id="errorBox"
+    class="error-box"
+  ></div>
+
+
+  <!-- REPORT ID -->
+
+  <div class="report-id-box">
+
+    <div class="report-id-label">
+      Unique Report ID
+    </div>
+
+    <div
+      id="reportId"
+      class="report-id"
+    >
+      GENERATING...
+    </div>
+
+  </div>
+
+
+  <!-- ===================================================
+       REPORT INFORMATION
+       =================================================== -->
+
+  <div class="panel">
+
+    <div class="panel-title">
+      REPORT INFORMATION
+    </div>
+
+
+    <div class="form-grid">
+
+
+      <!-- STORE CODE -->
+
+      <div class="form-group">
+
+        <label>
+          Store Code
+          <span class="required">*</span>
+        </label>
+
+        <select
+          id="storeCode"
+          onchange="storeChanged()"
+        >
+
+          <option value="">
+            Select Store Code
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <!-- STORE NAME -->
+
+      <div class="form-group">
+
+        <label>
+          Store / Hub Name
+        </label>
+
+        <input
+          id="storeName"
+          type="text"
+          readonly
+          placeholder="Based on Store Code"
+        >
+
+      </div>
+
+
+      <!-- AREA
+           HIDDEN BUT STILL AVAILABLE TO JAVASCRIPT
+      -->
+
+      <div class="form-group area-field">
+
+        <label>
+          Area
+        </label>
+
+        <input
+          id="area"
+          type="text"
+          readonly
+        >
+
+      </div>
+
+
+      <!-- SUBMITTED BY -->
+
+      <div class="form-group">
+
+        <label>
+          Reported By / Submitted By
+          <span class="required">*</span>
+        </label>
+
+        <input
+          id="submittedBy"
+          type="text"
+          placeholder="Enter name"
+          autocomplete="off"
+        >
+
+      </div>
+
+
+    </div>
+
+  </div>
+
+
+  <!-- ===================================================
+       TURN-OVER DESTINATION
+       =================================================== -->
+
+  <div class="panel">
+
+    <div class="panel-title">
+      TURN-OVER TO
+    </div>
+
+
+    <div class="turnover-options">
+
+      <div class="turnover-option">
+
+        <input
+          type="radio"
+          name="turnoverType"
+          id="turnoverSameStore"
+          value="SAME STORE"
+          onchange="turnoverChanged()"
+        >
+
+        <label
+          for="turnoverSameStore"
+          class="turnover-label"
+        >
+          🏪 SAME STORE
+        </label>
+
+      </div>
+
+
+      <div class="turnover-option">
+
+        <input
+          type="radio"
+          name="turnoverType"
+          id="turnoverBsc"
+          value="BSC"
+          onchange="turnoverChanged()"
+        >
+
+        <label
+          for="turnoverBsc"
+          class="turnover-label"
+        >
+          🏢 BSC
+        </label>
+
+      </div>
+
+    </div>
+
+
+    <div
+      id="sameStoreBox"
+      class="destination-box"
+    >
+
+      <div class="form-grid">
+
+        <div class="form-group">
+
+          <label>
+            Destination Store Code
+          </label>
+
+          <input
+            id="sameStoreCode"
+            type="text"
+            readonly
+            placeholder="Automatically uses originating Store Code"
+          >
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>
+            Destination Store / Hub Name
+          </label>
+
+          <input
+            id="sameStoreName"
+            type="text"
+            readonly
+            placeholder="Automatically uses originating Store Name"
+          >
+
+        </div>
+
+      </div>
+
+
+      <div class="ocr-note">
+
+        SAME STORE automatically uses the Store Code and
+        Store / Hub Name selected above.
+
+      </div>
+
+    </div>
+
+
+    <div
+      id="bscBox"
+      class="destination-box"
+    >
+
+      <div class="form-grid">
+
+        <div class="form-group">
+
+          <label>
+            Business Center
+            <span class="required">*</span>
+          </label>
+
+          <select
+            id="bscCode"
+            onchange="bscChanged()"
+          >
+
+            <option value="">
+              Select BSC
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>
+            BSC Name
+          </label>
+
+          <input
+            id="bscName"
+            type="text"
+            readonly
+            placeholder="Based on BSC"
+          >
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- ===================================================
+       CARD CAPTURE - MULTIPLE CARDS
+       =================================================== -->
+
+  <div class="panel">
+
+    <div class="panel-title">
+      CARD CAPTURE
+    </div>
+
+
+    <input
+      id="cameraInput"
+      type="file"
+      accept="image/*"
+      capture="environment"
+      style="display:none"
+      onchange="cameraSelected(this)"
+    >
+
+
+    <input
+      id="multiImageInput"
+      type="file"
+      accept="image/*"
+      multiple
+      style="display:none"
+      onchange="multiImagesSelected(this)"
+    >
+
+
+    <!-- CARD LIST -->
+
+    <div
+      id="cardList"
+      class="card-list"
+    ></div>
+
+
+    <!-- BOTTOM CARD ACTIONS -->
+
+    <div class="card-bottom-actions">
+
+      <button
+        type="button"
+        class="button button-secondary"
+        onclick="addEmptyCard()"
+      >
+        ＋ ADD ANOTHER CARD
+      </button>
+
+
+      <button
+        type="button"
+        class="button button-secondary"
+        onclick="openMultiUpload()"
+      >
+        📁 UPLOAD MULTIPLE
+      </button>
+
+    </div>
+
+
+    <div
+      class="ocr-note"
+      style="margin-top:15px;"
+    >
+
+      OCR is performed in the browser using Tesseract.js.
+      Card images are not sent to Google Cloud Vision.
+
+    </div>
+
+  </div>
+
+
+  <!-- ===================================================
+       SUBMIT
+       =================================================== -->
+
+  <div class="submit-area">
+
+    <button
+      type="button"
+      class="button button-secondary"
+      onclick="resetReport()"
+    >
+      CLEAR
+    </button>
+
+
+    <button
+      type="button"
+      id="submitButton"
+      class="button button-success submit-button"
+      onclick="submitReport()"
+    >
+      SUBMIT LBC-RPC REPORT
+    </button>
+
+  </div>
+
+
+</section>
+
+
+<!-- =====================================================
+     LOCATE CARD
+     ===================================================== -->
+
+<section
+  id="locate"
+  class="section"
+>
+
+  <div class="page-title">
+
+    <h1>
+      LOCATE CARD
+    </h1>
+
+    <p>
+      Search for a card using its 16-digit card number.
+    </p>
+
+  </div>
+
+
+  <div class="panel">
+
+    <div class="placeholder">
+
+      <div class="placeholder-icon">
+        🔍
+      </div>
+
+      <h2>
+        Card Location Search
+      </h2>
+
+      <p>
+        This module will be connected to the CARD DATABASE
+        in the next step.
+      </p>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- =====================================================
+     RELEASE CARD
+     ===================================================== -->
+
+<section
+  id="release"
+  class="section"
+>
+
+  <div class="page-title">
+
+    <h1>
+      RELEASE CARD
+    </h1>
+
+    <p>
+      Process the release and movement of an LBC-RPC card.
+    </p>
+
+  </div>
+
+
+  <div class="panel">
+
+    <div class="placeholder">
+
+      <div class="placeholder-icon">
+        📦
+      </div>
+
+      <h2>
+        Card Release
+      </h2>
+
+      <p>
+        The card release workflow will be connected to
+        the CARD DATABASE in the next step.
+      </p>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+</main>
+
+
+<!-- =====================================================
+     LIVE CAMERA MODAL
+     ===================================================== -->
+
+<div
+  id="cameraModal"
+  class="camera-modal"
+  aria-hidden="true"
+  style="display:none !important;"
+>
+
+  <div class="camera-box">
+
+    <div class="camera-header">
+
+      <div class="camera-title">
+        📷 CAPTURE CARD IMAGE
+      </div>
+
+      <button
+        type="button"
+        class="button button-secondary"
+        onclick="closeCamera()"
+      >
+        ✕ CLOSE
+      </button>
+
+    </div>
+
+
+    <video
+      id="cameraVideo"
+      class="camera-video"
+      autoplay
+      playsinline
+      muted
+    ></video>
+
+
+    <canvas
+      id="cameraCanvas"
+      style="display:none"
+    ></canvas>
+
+
+    <div class="camera-controls">
+
+      <button
+        type="button"
+        class="button button-primary"
+        onclick="takeCameraPhoto()"
+      >
+        📸 CAPTURE PHOTO
+      </button>
+
+
+      <button
+        type="button"
+        class="button button-secondary"
+        onclick="closeCamera()"
+      >
+        CANCEL
+      </button>
+
+    </div>
+
+
+    <div class="camera-hint">
+
+      Position the complete card inside the frame,
+      then press CAPTURE PHOTO.
+      OCR will start automatically.
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- =====================================================
+     LOADING OVERLAY
+     ===================================================== -->
+
+<div
+  id="loadingOverlay"
+  class="loading-overlay"
+>
+
+  <div class="loading-box">
+
+    <div class="spinner"></div>
+
+    <strong id="loadingText">
+      Processing...
+    </strong>
+
+
+    <div
+      id="loadingSubtext"
+      style="
+        margin-top:8px;
+        font-size:12px;
+        color:#64748b;
+      "
+    >
+
+      Please wait.
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- =====================================================
+     FOOTER
+     ===================================================== -->
+
+<footer>
+  Develop by JMP 2026
+</footer>
+
+
+<script>
+
+
+/* =====================================================
+   GLOBAL VARIABLES
+   ===================================================== */
+
+let portalData = null;
+
+let cardRecords = [];
+
+let ocrQueue = [];
+
+let ocrQueueRunning = false;
+
+
+/* =====================================================
+   CAMERA CONFIGURATION
+   ===================================================== */
+
+const CAMERA_CAPTURE_URL =
+  'https://ecpark-server.github.io/lbc-rpc-camera/CameraCapture.html';
+
+let cameraWindow = null;
+
+let cameraRequestId = '';
+
+let cameraTargetIndex = -1;
+
+
+const MAX_CARDS = 50;
+
+
+/* =====================================================
+   INITIALIZATION
+   ===================================================== */
+
+document.addEventListener(
+  'DOMContentLoaded',
+  function() {
+
+    loadPortalData();
+
+    addEmptyCard();
+
+  }
+);
+
+
+/* =====================================================
+   LOAD PORTAL DATA
+   ===================================================== */
+
+function loadPortalData() {
+
+  google.script.run
+
+    .withSuccessHandler(
+      function(data) {
+
+        portalData = data;
+
+        populateStores();
+
+        populateBSCs();
+
+
+        if (data.logoUrl) {
+
+          const logo =
+            document.getElementById('companyLogo');
+
+          const placeholder =
+            document.getElementById('logoPlaceholder');
+
+
+          logo.src = data.logoUrl;
+
+          logo.style.display = 'block';
+
+          placeholder.style.display = 'none';
+
+        }
+
+
+        generateReportId();
+
+      }
+    )
+
+    .withFailureHandler(
+      function(error) {
+
+        showError(
+          error.message ||
+          'Unable to load portal data.'
+        );
+
+      }
+    )
+
+    .getPortalData();
+
+}
+
+
+/* =====================================================
+   GENERATE REPORT ID
+   ===================================================== */
+
+function generateReportId() {
+
+  document.getElementById('reportId')
+    .textContent = 'GENERATING...';
+
+
+  google.script.run
+
+    .withSuccessHandler(
+      function(id) {
+
+        document.getElementById('reportId')
+          .textContent = id;
+
+      }
+    )
+
+    .withFailureHandler(
+      function(error) {
+
+        document.getElementById('reportId')
+          .textContent = 'ERROR';
+
+
+        showError(
+          error.message ||
+          'Unable to generate Report ID.'
+        );
+
+      }
+    )
+
+    .generateRPCUniqueId();
+
+}
+
+
+/* =====================================================
+   POPULATE STORES
+   ===================================================== */
+
+function populateStores() {
+
+  const select =
+    document.getElementById('storeCode');
+
+
+  select.innerHTML =
+    '<option value="">Select Store Code</option>';
+
+
+  portalData.stores.forEach(
+    function(store) {
+
+      const option =
+        document.createElement('option');
+
+
+      option.value =
+        store.storeCode;
+
+
+      option.textContent =
+        store.storeCode +
+        ' - ' +
+        store.storeName;
+
+
+      select.appendChild(option);
+
+    }
+  );
+
+}
+
+
+/* =====================================================
+   POPULATE BSC
+   ===================================================== */
+
+function populateBSCs() {
+
+  const select =
+    document.getElementById('bscCode');
+
+
+  select.innerHTML =
+    '<option value="">Select BSC</option>';
+
+
+  portalData.bscs.forEach(
+    function(bsc) {
+
+      const option =
+        document.createElement('option');
+
+
+      option.value =
+        bsc.storeCode;
+
+
+      option.textContent =
+        bsc.storeCode +
+        ' - ' +
+        bsc.storeName;
+
+
+      select.appendChild(option);
+
+    }
+  );
+
+}
+
+
+/* =====================================================
+   STORE CHANGE
+   ===================================================== */
+
+function storeChanged() {
+
+  const code =
+    document.getElementById('storeCode').value;
+
+
+  const record =
+    portalData.stores.find(
+      function(store) {
+
+        return String(store.storeCode) ===
+               String(code);
+
+      }
+    );
+
+
+  document.getElementById('storeName').value =
+    record ? record.storeName : '';
+
+
+  document.getElementById('area').value =
+    record ? record.area : '';
+
+
+  document.getElementById('sameStoreCode').value =
+    record ? record.storeCode : '';
+
+
+  document.getElementById('sameStoreName').value =
+    record ? record.storeName : '';
+
+}
+
+
+/* =====================================================
+   TURNOVER CHANGE
+   ===================================================== */
+
+function turnoverChanged() {
+
+  const type =
+    document.querySelector(
+      'input[name="turnoverType"]:checked'
+    );
+
+
+  document.getElementById('sameStoreBox')
+    .classList.remove('show');
+
+
+  document.getElementById('bscBox')
+    .classList.remove('show');
+
+
+  if (!type) return;
+
+
+  if (type.value === 'SAME STORE') {
+
+    const store =
+      document.getElementById('storeCode').value;
+
+
+    if (store) {
+
+      storeChanged();
+
+    }
+
+
+    document.getElementById('sameStoreBox')
+      .classList.add('show');
+
+  }
+
+  else {
+
+    document.getElementById('bscBox')
+      .classList.add('show');
+
+  }
+
+}
+
+
+/* =====================================================
+   BSC CHANGE
+   ===================================================== */
+
+function bscChanged() {
+
+  const code =
+    document.getElementById('bscCode').value;
+
+
+  const record =
+    portalData.bscs.find(
+      function(bsc) {
+
+        return String(bsc.storeCode) ===
+               String(code);
+
+      }
+    );
+
+
+  document.getElementById('bscName').value =
+    record ? record.storeName : '';
+
+}
+
+
+/* =====================================================
+   CARD OBJECT
+   ===================================================== */
+
+function createEmptyCardRecord() {
+
+  return {
+
+    file: null,
+
+    dataUrl: '',
+
+    cardNumber: '',
+
+    ocrRawText: '',
+
+    status: 'Waiting for image...',
+
+    ocrBusy: false,
+
+    ocrProgress: 0,
+
+    validated: false
+
+  };
+
+}
+
+
+/* =====================================================
+   ADD EMPTY CARD
+   ===================================================== */
+
+function addEmptyCard() {
+
+  if (cardRecords.length >= MAX_CARDS) {
+
+    showError(
+      'Maximum of ' +
+      MAX_CARDS +
+      ' cards per report.'
+    );
+
+    return;
+
+  }
+
+
+  cardRecords.push(
+    createEmptyCardRecord()
+  );
+
+
+  renderCards();
+
+}
+
+
+/* =====================================================
+   ADD CAMERA CARD
+   ===================================================== */
+
+function addCameraCard() {
+
+  let target =
+    cardRecords.findIndex(
+      function(c) {
+        return !c.file;
+      }
+    );
+
+
+  if (target < 0) {
+
+    if (cardRecords.length >= MAX_CARDS) {
+
+      showError(
+        'Maximum of ' +
+        MAX_CARDS +
+        ' cards per report.'
+      );
+
+      return;
+
+    }
+
+
+    cardRecords.push(
+      createEmptyCardRecord()
+    );
+
+
+    target =
+      cardRecords.length - 1;
+
+
+    renderCards();
+
+  }
+
+
+  openCamera(target);
+
+}
+
+
+/* =====================================================
+   MULTI UPLOAD
+   ===================================================== */
+
+function openMultiUpload() {
+
+  const input =
+    document.getElementById('multiImageInput');
+
+
+  input.value = '';
+
+  input.click();
+
+}
+
+
+/* =====================================================
+   CAMERA INPUT FALLBACK
+   ===================================================== */
+
+function cameraSelected(input) {
+
+  if (
+    !input.files ||
+    !input.files.length
+  ) return;
+
+
+  const index =
+    Number(
+      input.dataset.targetIndex || 0
+    );
+
+
+  setCardFile(
+    index,
+    input.files[0]
+  );
+
+}
+
+
+/* =====================================================
+   MULTIPLE IMAGE SELECTION
+   ===================================================== */
+
+function multiImagesSelected(input) {
+
+  if (
+    !input.files ||
+    !input.files.length
+  ) return;
+
+
+  const files =
+    Array.from(input.files);
+
+
+  let nextIndex =
+    cardRecords.findIndex(
+      function(c) {
+        return !c.file;
+      }
+    );
+
+
+  if (nextIndex < 0) {
+
+    nextIndex =
+      cardRecords.length;
+
+  }
+
+
+  files.forEach(
+    function(file) {
+
+      if (nextIndex >= MAX_CARDS) {
+        return;
+      }
+
+
+      if (!cardRecords[nextIndex]) {
+
+        cardRecords.push(
+          createEmptyCardRecord()
+        );
+
+      }
+
+
+      setCardFile(
+        nextIndex,
+        file
+      );
+
+
+      nextIndex++;
+
+    }
+  );
+
+
+  input.value = '';
+
+}
+
+
+/* =====================================================
+   OPEN CAMERA
+   ===================================================== */
+
+function openCamera(index) {
+
+  cameraTargetIndex = index;
+
+
+  cameraRequestId =
+    'RPC-CAM-' +
+    Date.now() +
+    '-' +
+    Math.random()
+      .toString(36)
+      .substring(2, 9);
+
+
+  const returnOrigin =
+    window.location.origin;
+
+
+  const cameraUrl =
+    CAMERA_CAPTURE_URL +
+    '?requestId=' +
+    encodeURIComponent(cameraRequestId) +
+    '&returnOrigin=' +
+    encodeURIComponent(returnOrigin);
+
+
+  cameraWindow =
+    window.open(
+      cameraUrl,
+      'LBCRPCCameraCapture',
+      'popup=yes,width=560,height=820,resizable=yes,scrollbars=yes'
+    );
+
+
+  if (!cameraWindow) {
+
+    showError(
+      'The Camera Capture window was blocked by your browser. Please allow pop-ups for this LBC-RPC Portal, then click CAPTURE again.'
+    );
+
+
+    cameraTargetIndex = -1;
+
+    return;
+
+  }
+
+
+  cardRecords[index].status =
+    'Camera opened. Capture the card in the camera window...';
+
+
+  renderCards();
+
+}
+
+
+/* =====================================================
+   CAMERA MESSAGE
+   ===================================================== */
+
+function handleCameraMessage(event) {
+
+  if (
+    !cameraWindow ||
+    event.source !== cameraWindow
+  ) return;
+
+
+  if (
+    !event.data ||
+    typeof event.data !== 'object'
+  ) return;
+
+
+  const message =
+    event.data;
+
+
+  if (
+    message.requestId !==
+    cameraRequestId
+  ) return;
+
+
+  if (
+    message.type ===
+    'LBC_RPC_CAMERA_CANCEL'
+  ) {
+
+    if (
+      cameraTargetIndex >= 0 &&
+      cardRecords[cameraTargetIndex] &&
+      !cardRecords[cameraTargetIndex].file
+    ) {
+
+      cardRecords[cameraTargetIndex].status =
+        'Camera capture cancelled.';
+
+
+      renderCards();
+
+    }
+
+
+    cameraTargetIndex = -1;
+
+    cameraRequestId = '';
+
+    cameraWindow = null;
+
+    return;
+
+  }
+
+
+  if (
+    message.type !==
+    'LBC_RPC_CAMERA_CAPTURE'
+  ) return;
+
+
+  const index =
+    cameraTargetIndex;
+
+
+  if (
+    index < 0 ||
+    !cardRecords[index]
+  ) return;
+
+
+  if (!message.imageData) {
+
+    showError(
+      'The camera returned no image data. Please capture the card again.'
+    );
+
+    return;
+
+  }
+
+
+  try {
+
+    const blob =
+      dataUrlToBlob(
+        message.imageData
+      );
+
+
+    const filename =
+      message.imageName ||
+      (
+        'LBC-RPC-CARD-' +
+        Date.now() +
+        '.jpg'
+      );
+
+
+    const file =
+      new File(
+        [blob],
+        filename,
+        {
+          type:
+            blob.type ||
+            'image/jpeg'
+        }
+      );
+
+
+    cardRecords[index].status =
+      'Captured. Loading image and starting OCR...';
+
+
+    setCardFile(
+      index,
+      file
+    );
+
+  }
+
+  catch (error) {
+
+    showError(
+      'Unable to receive the captured card image. Please try again.'
+    );
+
+  }
+
+
+  cameraTargetIndex = -1;
+
+  cameraRequestId = '';
+
+  cameraWindow = null;
+
+}
+
+
+/* =====================================================
+   DATA URL TO BLOB
+   ===================================================== */
+
+function dataUrlToBlob(dataUrl) {
+
+  const parts =
+    String(dataUrl).split(',');
+
+
+  if (parts.length !== 2) {
+
+    throw new Error(
+      'Invalid camera image data.'
+    );
+
+  }
+
+
+  const mimeMatch =
+    parts[0].match(
+      /data:([^;]+);base64/i
+    );
+
+
+  const mime =
+    mimeMatch ?
+    mimeMatch[1] :
+    'image/jpeg';
+
+
+  const binary =
+    atob(parts[1]);
+
+
+  const bytes =
+    new Uint8Array(
+      binary.length
+    );
+
+
+  for (
+    let i = 0;
+    i < binary.length;
+    i++
+  ) {
+
+    bytes[i] =
+      binary.charCodeAt(i);
+
+  }
+
+
+  return new Blob(
+    [bytes],
+    {
+      type: mime
+    }
+  );
+
+}
+
+
+/* =====================================================
+   RECEIVE CAMERA CAPTURE
+   ===================================================== */
+
+window.addEventListener(
+  'message',
+  handleCameraMessage,
+  false
+);
+
+
+/* =====================================================
+   CLOSE CAMERA
+   ===================================================== */
+
+function closeCamera() {
+
+  if (
+    cameraWindow &&
+    !cameraWindow.closed
+  ) {
+
+    try {
+
+      cameraWindow.close();
+
+    }
+
+    catch (e) {}
+
+  }
+
+
+  cameraWindow = null;
+
+  cameraRequestId = '';
+
+  cameraTargetIndex = -1;
+
+}
+
+
+/* =====================================================
+   CAMERA COMPATIBILITY
+   ===================================================== */
+
+function takeCameraPhoto() {
+
+  if (cameraTargetIndex >= 0) {
+
+    openCamera(
+      cameraTargetIndex
+    );
+
+  }
+
+  else {
+
+    addCameraCard();
+
+  }
+
+}
+
+
+/* =====================================================
+   SET CARD FILE
+   ===================================================== */
+
+function setCardFile(index, file) {
+
+  if (!cardRecords[index]) return;
+
+
+  cardRecords[index].file =
+    file;
+
+
+  cardRecords[index].dataUrl =
+    '';
+
+
+  cardRecords[index].cardNumber =
+    '';
+
+
+  cardRecords[index].ocrRawText =
+    '';
+
+
+  cardRecords[index].validated =
+    false;
+
+
+  cardRecords[index].status =
+    'Loading image...';
+
+
+  renderCards();
+
+
+  const reader =
+    new FileReader();
+
+
+  reader.onload =
+    function(event) {
+
+      cardRecords[index].dataUrl =
+        event.target.result;
+
+
+      cardRecords[index].status =
+        'Image loaded. OCR starting automatically...';
+
+
+      renderCards();
+
+
+      queueCardOCR(index);
+
+    };
+
+
+  reader.onerror =
+    function() {
+
+      cardRecords[index].status =
+        'Unable to read image.';
+
+
+      renderCards();
+
+    };
+
+
+  reader.readAsDataURL(file);
+
+}
+
+
+/* =====================================================
+   OCR QUEUE
+   ===================================================== */
+
+function queueCardOCR(index) {
+
+  if (
+    ocrQueue.indexOf(index) === -1
+  ) {
+
+    ocrQueue.push(index);
+
+  }
+
+
+  processOCRQueue();
+
+}
+
+
+/* =====================================================
+   PROCESS OCR QUEUE
+   ===================================================== */
+
+async function processOCRQueue() {
+
+  if (ocrQueueRunning) return;
+
+
+  ocrQueueRunning = true;
+
+
+  try {
+
+    while (ocrQueue.length) {
+
+      const index =
+        ocrQueue.shift();
+
+
+      if (
+        !cardRecords[index] ||
+        !cardRecords[index].file ||
+        !cardRecords[index].dataUrl
+      ) {
+
+        continue;
+
+      }
+
+
+      await runCardOCR(index);
+
+    }
+
+  }
+
+  finally {
+
+    ocrQueueRunning = false;
+
+  }
+
+}
+
+
+/* =====================================================
+   FORMAT DISPLAY CARD NUMBER
+   Backend remains unformatted 16 digits.
+   ===================================================== */
+
+function formatCardNumberDisplay(value) {
+
+  const digits =
+    String(value || '')
+      .replace(/\D/g, '')
+      .substring(0, 16);
+
+  return digits.replace(
+    /(\d{4})(?=\d)/g,
+    '$1 '
+  ).trim();
+
+}
+
+
+/* =====================================================
+   RENDER CARDS
+   ===================================================== */
+
+function renderCards() {
+
+  const container =
+    document.getElementById('cardList');
+
+
+  container.innerHTML = '';
+
+
+  if (!cardRecords.length) {
+
+    container.innerHTML =
+      '<div class="card-empty">' +
+      'No card added yet. Capture or upload a card image.' +
+      '</div>';
+
+    return;
+
+  }
+
+
+  cardRecords.forEach(
+    function(card, index) {
+
+      const wrapper =
+        document.createElement('div');
+
+
+      wrapper.className =
+        'card-item';
+
+
+      /* HEADER */
+
+      const header =
+        document.createElement('div');
+
+
+      header.className =
+        'card-item-header';
+
+
+      const title =
+        document.createElement('div');
+
+
+      title.className =
+        'card-item-title';
+
+
+      title.textContent =
+        'CARD ' +
+        (index + 1);
+
+
+      header.appendChild(title);
+
+
+      const actions =
+        document.createElement('div');
+
+
+      actions.className =
+        'card-actions';
+
+
+      /* CAPTURE */
+
+      const cameraBtn =
+        document.createElement('button');
+
+
+      cameraBtn.type =
+        'button';
+
+
+      cameraBtn.className =
+        'button button-primary';
+
+
+      cameraBtn.textContent =
+        '📷 CAPTURE';
+
+
+      cameraBtn.onclick =
+        function() {
+
+          captureForCard(index);
+
+        };
+
+
+      actions.appendChild(
+        cameraBtn
+      );
+
+
+      /* UPLOAD */
+
+      const uploadBtn =
+        document.createElement('button');
+
+
+      uploadBtn.type =
+        'button';
+
+
+      uploadBtn.className =
+        'button button-secondary';
+
+
+      uploadBtn.textContent =
+        '📁 UPLOAD';
+
+
+      uploadBtn.onclick =
+        function() {
+
+          uploadForCard(index);
+
+        };
+
+
+      actions.appendChild(
+        uploadBtn
+      );
+
+
+      /* REMOVE */
+
+      if (
+        cardRecords.length > 1
+      ) {
+
+        const removeBtn =
+          document.createElement('button');
+
+
+        removeBtn.type =
+          'button';
+
+
+        removeBtn.className =
+          'button button-danger remove-card';
+
+
+        removeBtn.textContent =
+          'REMOVE';
+
+
+        removeBtn.onclick =
+          function() {
+
+            removeCard(index);
+
+          };
+
+
+        actions.appendChild(
+          removeBtn
+        );
+
+      }
+
+
+      header.appendChild(
+        actions
+      );
+
+
+      wrapper.appendChild(
+        header
+      );
+
+
+      /* IMAGE PREVIEW */
+
+      if (card.dataUrl) {
+
+        const preview =
+          document.createElement('div');
+
+
+        preview.className =
+          'card-preview-wrap';
+
+
+        const img =
+          document.createElement('img');
+
+
+        img.className =
+          'card-preview';
+
+
+        img.src =
+          card.dataUrl;
+
+
+        img.alt =
+          'Card ' +
+          (index + 1) +
+          ' Preview';
+
+
+        preview.appendChild(
+          img
+        );
+
+
+        wrapper.appendChild(
+          preview
+        );
+
+      }
+
+      else {
+
+        const empty =
+          document.createElement('div');
+
+
+        empty.className =
+          'card-empty';
+
+
+        empty.textContent =
+          'Capture or upload this card image.';
+
+
+        wrapper.appendChild(
+          empty
+        );
+
+      }
+
+
+      /* OCR */
+
+      const ocr =
+        document.createElement('div');
+
+
+      ocr.className =
+        'ocr-section';
+
+
+      const label =
+        document.createElement('label');
+
+
+      label.textContent =
+        '16-Digit Card Number';
+
+
+      ocr.appendChild(
+        label
+      );
+
+
+      const input =
+        document.createElement('input');
+
+
+      input.className =
+        'card-number-input';
+
+
+      input.type =
+        'text';
+
+
+      input.inputMode =
+        'numeric';
+
+
+      input.maxLength =
+        19;
+
+
+      input.autocomplete =
+        'off';
+
+
+      input.placeholder =
+        'XXXX XXXX XXXX XXXX';
+
+
+      input.value =
+        formatCardNumberDisplay(
+          card.cardNumber
+        );
+
+
+      input.oninput =
+        function() {
+
+          const digits =
+            input.value
+              .replace(/\D/g, '')
+              .substring(0, 16);
+
+
+          cardRecords[index].cardNumber =
+            digits;
+
+
+          input.value =
+            formatCardNumberDisplay(
+              digits
+            );
+
+
+          cardRecords[index].validated =
+            false;
+
+
+          if (
+            cardRecords[index].cardNumber.length === 16
+          ) {
+
+            cardRecords[index].status =
+              '16 digits entered. Please validate the card number.';
+
+          }
+
+          else {
+
+            cardRecords[index].status =
+              'Please review the OCR result or enter the correct 16-digit number.';
+
+          }
+
+
+          renderCards();
+
+
+          setTimeout(
+            function() {
+
+              const cards =
+                document.querySelectorAll(
+                  '.card-number-input'
+                );
+
+
+              if (cards[index]) {
+
+                cards[index].focus();
+
+
+                cards[index].setSelectionRange(
+                  cards[index].value.length,
+                  cards[index].value.length
+                );
+
+              }
+
+            },
+            0
+          );
+
+        };
+
+
+      ocr.appendChild(
+        input
+      );
+
+
+      /* STATUS */
+
+      const status =
+        document.createElement('div');
+
+
+      status.className =
+        'ocr-status';
+
+
+      status.textContent =
+        card.status;
+
+
+      ocr.appendChild(
+        status
+      );
+
+
+      /* PROGRESS */
+
+      const progress =
+        document.createElement('div');
+
+
+      progress.className =
+        'ocr-progress' +
+        (
+          card.ocrBusy ?
+          ' show' :
+          ''
+        );
+
+
+      const bar =
+        document.createElement('div');
+
+
+      bar.className =
+        'ocr-progress-bar';
+
+
+      bar.style.width =
+        card.ocrProgress ?
+        card.ocrProgress + '%' :
+        '0%';
+
+
+      progress.appendChild(
+        bar
+      );
+
+
+      ocr.appendChild(
+        progress
+      );
+
+
+      /* VALIDATION */
+
+      const validationRow =
+        document.createElement('div');
+
+
+      validationRow.className =
+        'validation-row';
+
+
+      const validateBtn =
+        document.createElement('button');
+
+
+      validateBtn.type =
+        'button';
+
+
+      validateBtn.className =
+        'button button-success';
+
+
+      validateBtn.textContent =
+        card.validated ?
+        '✓ CARD NUMBER VALIDATED' :
+        '✓ VALIDATE CARD NUMBER';
+
+
+      validateBtn.disabled =
+        card.ocrBusy ||
+        !/^\d{16}$/.test(
+          card.cardNumber
+        );
+
+
+      validateBtn.onclick =
+        function() {
+
+          validateCardNumber(index);
+
+        };
+
+
+      validationRow.appendChild(
+        validateBtn
+      );
+
+
+      const badge =
+        document.createElement('span');
+
+
+      badge.className =
+        'validation-badge ' +
+        (
+          card.validated
+          ? 'valid'
+          : (
+              /^\d{16}$/.test(
+                card.cardNumber
+              )
+              ? 'invalid'
+              : ''
+            )
+        );
+
+
+      badge.textContent =
+        card.validated
+        ? 'VALIDATED'
+        : (
+            /^\d{16}$/.test(
+              card.cardNumber
+            )
+            ? 'REVIEW REQUIRED'
+            : '16 DIGITS REQUIRED'
+          );
+
+
+      validationRow.appendChild(
+        badge
+      );
+
+
+      ocr.appendChild(
+        validationRow
+      );
+
+
+      wrapper.appendChild(
+        ocr
+      );
+
+
+      container.appendChild(
+        wrapper
+      );
+
+    }
+  );
+
+}
+
+
+/* =====================================================
+   CAPTURE FOR CARD
+   ===================================================== */
+
+function captureForCard(index) {
+
+  openCamera(index);
+
+}
+
+
+/* =====================================================
+   UPLOAD FOR CARD
+   ===================================================== */
+
+function uploadForCard(index) {
+
+  const input =
+    document.createElement('input');
+
+
+  input.type =
+    'file';
+
+
+  input.accept =
+    'image/*';
+
+
+  input.multiple =
+    false;
+
+
+  input.onchange =
+    function() {
+
+      if (
+        input.files &&
+        input.files[0]
+      ) {
+
+        setCardFile(
+          index,
+          input.files[0]
+        );
+
+      }
+
+    };
+
+
+  input.click();
+
+}
+
+
+/* =====================================================
+   REMOVE CARD
+   ===================================================== */
+
+function removeCard(index) {
+
+  if (
+    !confirm(
+      'Remove Card ' +
+      (index + 1) +
+      ' from this report?'
+    )
+  ) {
+
+    return;
+
+  }
+
+
+  cardRecords.splice(
+    index,
+    1
+  );
+
+
+  ocrQueue =
+    ocrQueue
+      .filter(
+        function(i) {
+          return i !== index;
+        }
+      )
+      .map(
+        function(i) {
+          return i > index ?
+            i - 1 :
+            i;
+        }
+      );
+
+
+  if (!cardRecords.length) {
+
+    addEmptyCard();
+
+  }
+
+
+  renderCards();
+
+}
+
+
+/* =====================================================
+   VALIDATE CARD NUMBER
+   ===================================================== */
+
+function validateCardNumber(index) {
+
+  const card =
+    cardRecords[index];
+
+
+  if (!card) return;
+
+
+  const number =
+    String(
+      card.cardNumber || ''
+    )
+    .replace(/\D/g, '');
+
+
+  if (
+    !/^\d{16}$/.test(number)
+  ) {
+
+    card.validated =
+      false;
+
+
+    card.status =
+      'Validation failed. Card number must contain exactly 16 digits.';
+
+
+    renderCards();
+
+    return;
+
+  }
+
+
+  card.cardNumber =
+    number;
+
+
+  card.validated =
+    true;
+
+
+  card.status =
+    'Card number validated and ready for submission.';
+
+
+  renderCards();
+
+}
+
+
+/* =====================================================
+   OCR
+   ===================================================== */
+
+async function runCardOCR(index) {
+
+  const card =
+    cardRecords[index];
+
+
+  if (
+    !card ||
+    !card.file ||
+    !card.dataUrl
+  ) return;
+
+
+  if (card.ocrBusy) return;
+
+
+  card.ocrBusy =
+    true;
+
+
+  card.ocrProgress =
+    5;
+
+
+  card.validated =
+    false;
+
+
+  card.status =
+    'Initializing OCR...';
+
+
+  renderCards();
+
+
+  try {
+
+    const result =
+      await Tesseract.recognize(
+        card.file,
+        'eng',
+        {
+          logger:
+            function(message) {
+
+              if (
+                message.status ===
+                'recognizing text'
+              ) {
+
+                card.ocrProgress =
+                  Math.round(
+                    (
+                      message.progress ||
+                      0
+                    ) * 100
+                  );
+
+
+                card.status =
+                  'OCR processing... ' +
+                  card.ocrProgress +
+                  '%';
+
+
+                renderCards();
+
+              }
+
+            }
+
+        }
+      );
+
+
+    card.ocrProgress =
+      100;
+
+
+    card.ocrRawText =
+      result.data.text || '';
+
+
+    const number =
+      extract16DigitCardNumber(
+        card.ocrRawText
+      );
+
+
+    if (number) {
+
+      card.cardNumber =
+        number;
+
+
+      card.status =
+        'OCR detected 16-digit card number. Please review it and click VALIDATE CARD NUMBER.';
+
+    }
+
+    else {
+
+      card.cardNumber =
+        '';
+
+
+      card.status =
+        'OCR completed, but a valid 16-digit card number was not detected. Enter it manually, then validate.';
+
+    }
+
+  }
+
+  catch (error) {
+
+    card.status =
+      'OCR failed: ' +
+      (
+        error.message ||
+        error
+      );
+
+  }
+
+  finally {
+
+    card.ocrBusy =
+      false;
+
+
+    renderCards();
+
+  }
+
+}
+
+
+/* =====================================================
+   EXTRACT 16 DIGIT CARD NUMBER
+   ===================================================== */
+
+function extract16DigitCardNumber(text) {
+
+  if (!text) return '';
+
+
+  const continuous =
+    text.match(
+      /\d{16}/g
+    );
+
+
+  if (
+    continuous &&
+    continuous.length
+  ) {
+
+    return continuous[0];
+
+  }
+
+
+  const normalized =
+    text
+
+      .replace(
+        /[Oo]/g,
+        '0'
+      )
+
+      .replace(
+        /[Il|]/g,
+        '1'
+      )
+
+      .replace(
+        /[^\d]/g,
+        ' '
+      );
+
+
+  const groups =
+    normalized.match(
+      /\d+/g
+    );
+
+
+  if (!groups) return '';
+
+
+  const combined =
+    groups.join('');
+
+
+  if (
+    combined.length === 16
+  ) {
+
+    return combined;
+
+  }
+
+
+  const match =
+    combined.match(
+      /\d{16}/
+    );
+
+
+  return match ?
+    match[0] :
+    '';
+
+}
+
+
+/* =====================================================
+   SUBMIT REPORT
+   ===================================================== */
+
+function submitReport() {
+
+  hideMessages();
+
+
+  const reportId =
+    document.getElementById(
+      'reportId'
+    ).textContent.trim();
+
+
+  const storeCode =
+    document.getElementById(
+      'storeCode'
+    ).value.trim();
+
+
+  const storeName =
+    document.getElementById(
+      'storeName'
+    ).value.trim();
+
+
+  const area =
+    document.getElementById(
+      'area'
+    ).value.trim();
+
+
+  const submittedBy =
+    document.getElementById(
+      'submittedBy'
+    ).value.trim();
+
+
+  const turnover =
+    document.querySelector(
+      'input[name="turnoverType"]:checked'
+    );
+
+
+  if (
+    !reportId ||
+    reportId === 'GENERATING...' ||
+    reportId === 'ERROR'
+  ) {
+
+    return showError(
+      'The Unique Report ID is not ready yet.'
+    );
+
+  }
+
+
+  if (!storeCode) {
+
+    return showError(
+      'Please select the Store Code.'
+    );
+
+  }
+
+
+  if (!storeName) {
+
+    return showError(
+      'Store / Hub Name was not populated. Please reselect the Store Code.'
+    );
+
+  }
+
+
+  if (!submittedBy) {
+
+    return showError(
+      'Please enter Reported By / Submitted By.'
+    );
+
+  }
+
+
+  if (!turnover) {
+
+    return showError(
+      'Please select Turn-over To: SAME STORE or BSC.'
+    );
+
+  }
+
+
+  if (
+    !cardRecords.length ||
+    cardRecords.some(
+      function(c) {
+        return !c.file || !c.dataUrl;
+      }
+    )
+  ) {
+
+    return showError(
+      'Every card must have an image.'
+    );
+
+  }
+
+
+  if (
+    cardRecords.some(
+      function(c) {
+        return !/^\d{16}$/.test(
+          c.cardNumber
+        );
+      }
+    )
+  ) {
+
+    return showError(
+      'Every card must have exactly 16 digits. Review the OCR/manual card numbers.'
+    );
+
+  }
+
+
+  if (
+    cardRecords.some(
+      function(c) {
+        return !c.validated;
+      }
+    )
+  ) {
+
+    return showError(
+      'Please review and click VALIDATE CARD NUMBER for every card before submitting.'
+    );
+
+  }
+
+
+  let turnoverCode = '';
+
+  let turnoverName = '';
+
+
+  if (
+    turnover.value ===
+    'SAME STORE'
+  ) {
+
+    turnoverCode =
+      document.getElementById(
+        'sameStoreCode'
+      ).value.trim();
+
+
+    turnoverName =
+      document.getElementById(
+        'sameStoreName'
+      ).value.trim();
+
+
+    if (
+      !turnoverCode ||
+      !turnoverName
+    ) {
+
+      return showError(
+        'Please select the originating Store Code first. SAME STORE will use it automatically.'
+      );
+
+    }
+
+  }
+
+  else {
+
+    turnoverCode =
+      document.getElementById(
+        'bscCode'
+      ).value.trim();
+
+
+    turnoverName =
+      document.getElementById(
+        'bscName'
+      ).value.trim();
+
+
+    if (
+      !turnoverCode ||
+      !turnoverName
+    ) {
+
+      return showError(
+        'Please select the BSC destination.'
+      );
+
+    }
+
+  }
+
+
+  const payloadCards =
+    cardRecords.map(
+      function(card) {
+
+        return {
+
+          cardNumber:
+            card.cardNumber,
+
+          imageData:
+            card.dataUrl,
+
+          ocrRawText:
+            card.ocrRawText || ''
+
+        };
+
+      }
+    );
+
+
+  setLoading(
+    true,
+    'Submitting LBC-RPC Report',
+    'Saving ' +
+    payloadCards.length +
+    ' card(s), OCR, PDF and database records...'
+  );
+
+
+  google.script.run
+
+    .withSuccessHandler(
+      function(result) {
+
+        setLoading(false);
+
+
+        showSuccess(
+
+          '<strong>Report submitted successfully.</strong><br><br>' +
+
+          'Unique Report ID: <strong>' +
+          escapeHtml(result.reportId) +
+          '</strong><br>' +
+
+          'Cards Submitted: <strong>' +
+          escapeHtml(result.count) +
+          '</strong><br>' +
+
+          'PDF: <a href="' +
+          escapeHtml(result.pdfUrl) +
+          '" target="_blank">Open PDF</a><br>' +
+
+          'Email: ' +
+          escapeHtml(result.emailStatus)
+
+        );
+
+
+        resetFormAfterSubmit();
+
+      }
+    )
+
+    .withFailureHandler(
+      function(error) {
+
+        setLoading(false);
+
+
+        showError(
+          error.message ||
+          'Unable to submit the report.'
+        );
+
+      }
+    )
+
+    .saveCardBatch({
+
+      uniqueId:
+        reportId,
+
+      storeCode:
+        storeCode,
+
+      storeName:
+        storeName,
+
+      area:
+        area,
+
+      processor:
+        submittedBy,
+
+      turnoverType:
+        turnover.value,
+
+      turnoverCode:
+        turnoverCode,
+
+      turnoverName:
+        turnoverName,
+
+      cards:
+        payloadCards
+
+    });
+
+}
+
+
+/* =====================================================
+   RESET AFTER SUBMISSION
+   ===================================================== */
+
+function resetFormAfterSubmit() {
+
+  document.getElementById(
+    'storeCode'
+  ).value = '';
+
+
+  document.getElementById(
+    'storeName'
+  ).value = '';
+
+
+  document.getElementById(
+    'area'
+  ).value = '';
+
+
+  document.getElementById(
+    'submittedBy'
+  ).value = '';
+
+
+  document.getElementById(
+    'sameStoreCode'
+  ).value = '';
+
+
+  document.getElementById(
+    'sameStoreName'
+  ).value = '';
+
+
+  document.getElementById(
+    'bscCode'
+  ).value = '';
+
+
+  document.getElementById(
+    'bscName'
+  ).value = '';
+
+
+  document.querySelectorAll(
+    'input[name="turnoverType"]'
+  ).forEach(
+    function(input) {
+
+      input.checked = false;
+
+    }
+  );
+
+
+  document.getElementById(
+    'sameStoreBox'
+  ).classList.remove('show');
+
+
+  document.getElementById(
+    'bscBox'
+  ).classList.remove('show');
+
+
+  cardRecords = [];
+
+  ocrQueue = [];
+
+
+  addEmptyCard();
+
+
+  generateReportId();
+
+}
+
+
+/* =====================================================
+   RESET REPORT
+   ===================================================== */
+
+function resetReport() {
+
+  if (
+    !confirm(
+      'Clear the current report?'
+    )
+  ) return;
+
+
+  resetFormAfterSubmit();
+
+  hideMessages();
+
+}
+
+
+/* =====================================================
+   SHOW SECTION
+   ===================================================== */
+
+function showSection(
+  sectionId,
+  button
+) {
+
+  document.querySelectorAll(
+    '.section'
+  ).forEach(
+    function(section) {
+
+      section.classList.remove(
+        'active'
+      );
+
+    }
+  );
+
+
+  document.querySelectorAll(
+    '.nav-button'
+  ).forEach(
+    function(nav) {
+
+      nav.classList.remove(
+        'active'
+      );
+
+    }
+  );
+
+
+  document.getElementById(
+    sectionId
+  ).classList.add(
+    'active'
+  );
+
+
+  button.classList.add(
+    'active'
+  );
+
+}
+
+
+/* =====================================================
+   LOADING
+   ===================================================== */
+
+function setLoading(
+  show,
+  title,
+  subtext
+) {
+
+  const overlay =
+    document.getElementById(
+      'loadingOverlay'
+    );
+
+
+  if (!show) {
+
+    overlay.classList.remove(
+      'show'
+    );
+
+    return;
+
+  }
+
+
+  document.getElementById(
+    'loadingText'
+  ).textContent =
+    title ||
+    'Processing...';
+
+
+  document.getElementById(
+    'loadingSubtext'
+  ).textContent =
+    subtext ||
+    'Please wait.';
+
+
+  overlay.classList.add(
+    'show'
+  );
+
+}
+
+
+/* =====================================================
+   SUCCESS
+   ===================================================== */
+
+function showSuccess(message) {
+
+  hideMessages();
+
+
+  const box =
+    document.getElementById(
+      'successBox'
+    );
+
+
+  box.innerHTML =
+    message;
+
+
+  box.classList.add(
+    'show'
+  );
+
+
+  window.scrollTo(
+    {
+      top: 0,
+      behavior: 'smooth'
+    }
+  );
+
+}
+
+
+/* =====================================================
+   ERROR
+   ===================================================== */
+
+function showError(message) {
+
+  hideMessages();
+
+
+  const box =
+    document.getElementById(
+      'errorBox'
+    );
+
+
+  box.innerHTML =
+    escapeHtml(message);
+
+
+  box.classList.add(
+    'show'
+  );
+
+
+  window.scrollTo(
+    {
+      top: 0,
+      behavior: 'smooth'
+    }
+  );
+
+}
+
+
+/* =====================================================
+   HIDE MESSAGES
+   ===================================================== */
+
+function hideMessages() {
+
+  document.getElementById(
+    'successBox'
+  ).classList.remove(
+    'show'
+  );
+
+
+  document.getElementById(
+    'errorBox'
+  ).classList.remove(
+    'show'
+  );
+
+}
+
+
+/* =====================================================
+   ESCAPE HTML
+   ===================================================== */
+
+function escapeHtml(value) {
+
+  return String(
+    value == null ?
+    '' :
+    value
+  )
+
+    .replace(
+      /&/g,
+      '&amp;'
+    )
+
+    .replace(
+      /</g,
+      '&lt;'
+    )
+
+    .replace(
+      />/g,
+      '&gt;'
+    )
+
+    .replace(
+      /"/g,
+      '&quot;'
+    )
+
+    .replace(
+      /'/g,
+      '&#039;'
+    );
+
+}
+
+</script>
+
+</body>
+
+</html>
