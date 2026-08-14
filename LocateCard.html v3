@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 
@@ -797,6 +798,61 @@
 
     }
 
+
+    /* =====================================================
+       CARD HISTORY
+       ===================================================== */
+
+    .card-history { width: 100%; }
+
+    .history-empty {
+      padding: 18px 12px;
+      text-align: center;
+      color: #7b8794;
+      font-size: 12px;
+      font-weight: 700;
+      border: 1px dashed #d4dfe8;
+      border-radius: 8px;
+      background: #f8fafc;
+    }
+
+    .history-item {
+      padding: 16px 0;
+      border-bottom: 1px solid #e4eaef;
+    }
+
+    .history-item:first-child { padding-top: 4px; }
+    .history-item:last-child { border-bottom: none; padding-bottom: 4px; }
+
+    .history-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: #0878c9;
+      margin-bottom: 9px;
+    }
+
+    .history-table { width: 100%; border-collapse: collapse; }
+
+    .history-table td {
+      padding: 6px 7px;
+      font-size: 12px;
+      vertical-align: top;
+      border-bottom: 1px solid #f0f3f6;
+    }
+
+    .history-table tr:last-child td { border-bottom: none; }
+    .history-table td:first-child { width: 32%; font-weight: 700; color: #52606d; }
+    .history-table td:last-child { color: #222; word-break: break-word; }
+
+    .history-status {
+      display: inline-block;
+      padding: 4px 9px;
+      border-radius: 20px;
+      font-size: 10px;
+      font-weight: 700;
+      background: #e8f5ec;
+      color: #1d6b36;
+    }
 
     /* =====================================================
        NOT FOUND
@@ -1656,6 +1712,21 @@
 
       </div>
 
+
+      <!-- CARD HISTORY -->
+      <div class="section">
+
+        <div class="section-title">
+          CARD HISTORY
+        </div>
+
+        <div id="cardHistory" class="card-history">
+          <div class="history-empty">
+            NO HISTORY AVAILABLE
+          </div>
+        </div>
+
+      </div>
     </div>
 
   </div>
@@ -1978,6 +2049,8 @@
     status.textContent =
       data.status || 'REPORTED';
 
+    renderCardHistory(data.history || []);
+
     /* =================================================
        IMAGE
        ================================================= */
@@ -2043,6 +2116,63 @@
 
   }
 
+
+  /* =====================================================
+     RENDER CARD HISTORY
+     ===================================================== */
+
+  function renderCardHistory(history) {
+    const container = document.getElementById('cardHistory');
+    if (!container) return;
+
+    if (!Array.isArray(history) || history.length === 0) {
+      container.innerHTML = '<div class="history-empty">NO HISTORY AVAILABLE</div>';
+      return;
+    }
+
+    const records = history.slice().sort(function(a, b) {
+      return parseHistoryDate(b && b.eventDateTime) - parseHistoryDate(a && a.eventDateTime);
+    });
+
+    container.innerHTML = records.map(function(item, index) {
+      const eventType = String(item.eventType || '').trim();
+      const status = String(item.status || '').trim();
+      const title = eventType || status || 'CARD EVENT';
+
+      return `
+        <div class="history-item">
+          <div class="history-title">${index + 1}. ${escapeHtml(title)}</div>
+          <table class="history-table">
+            <tr><td>Date / Time</td><td>${escapeHtml(item.eventDateTime || '—')}</td></tr>
+            <tr><td>Status</td><td><span class="history-status">${escapeHtml(status || '—')}</span></td></tr>
+            <tr><td>From</td><td>${escapeHtml(item.fromLocation || '—')}</td></tr>
+            <tr><td>To</td><td>${escapeHtml(item.toLocation || '—')}</td></tr>
+            <tr><td>Processor</td><td>${escapeHtml(item.processorUser || '—')}</td></tr>
+            ${item.releasedTo ? `<tr><td>Released To</td><td>${escapeHtml(item.releasedTo)}</td></tr>` : ''}
+            ${item.remarks ? `<tr><td>Remarks</td><td>${escapeHtml(item.remarks)}</td></tr>` : ''}
+          </table>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function parseHistoryDate(value) {
+    if (!value) return 0;
+    const direct = new Date(value).getTime();
+    if (!isNaN(direct)) return direct;
+    const normalized = String(value).replace(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/, '$3-$1-$2');
+    const parsed = new Date(normalized).getTime();
+    return isNaN(parsed) ? 0 : parsed;
+  }
+
+  function escapeHtml(value) {
+    return String(value == null ? '' : value)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/\"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
 
   /* =====================================================
      DISPLAY NOT FOUND
