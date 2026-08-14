@@ -1,0 +1,3036 @@
+/*******************************************************
+ * LBC-RPC PORTAL - STORE DASHBOARD
+ * LBC-RPC REPORTING / MULTI-CARD SUBMISSION
+ *
+ * Browser OCR: Tesseract.js
+ * NO Google Cloud Vision API
+ *
+ * CARD NUMBER RULE:
+ * DISPLAY  : 5000 0000 0898 7462
+ * BACKEND  : 5000000008987462
+ *
+ * DUPLICATE CARD PROTECTION:
+ * - Existing CARD DATABASE records are checked first.
+ * - Duplicate cards inside the same submission are also blocked.
+ * - Nothing is saved if a duplicate exists.
+ *******************************************************/
+
+
+/*******************************************************
+ * CONFIGURATION
+ *******************************************************/
+
+const CONFIG = {
+  SYSTEM_TITLE: 'LBC-RPC PORTAL',
+  FOOTER: 'Develop by JMP 2026',
+
+  PORTAL_FOLDER_ID:
+    '1Bgf5Y7qHzuy5hTDBbuzgKJgYnhGUbPm2',
+
+  CARD_IMAGES_FOLDER_ID:
+    '1F2uX2COcIjBrRnGPbZP9iHLEBtT24SGl',
+
+  OCR_FOLDER_ID:
+    '1VqfzSHCahAZtD8x-fGXx0tmhgCVUVEl3',
+
+  PDF_REPORTS_FOLDER_ID:
+    '1QDoV6gezhJpJbbrWreQdZZDQl9_ljcEs',
+
+  COMPANY_LOGO_FOLDER_ID:
+    '1KbLbTTAxvclTJ6KbyStLblyrveWvy4XC',
+
+  EMAIL_SHEET:
+    'Email',
+
+  CARD_DATABASE_SHEET:
+    'CARD DATABASE'
+};
+
+
+/*******************************************************
+ * WEB APP
+ *******************************************************/
+
+function doGet(e) {
+
+  const page =
+    e &&
+    e.parameter &&
+    e.parameter.page
+      ? e.parameter.page
+      : 'dashboard';
+
+
+  /*
+   * LOCATE CARD
+   */
+
+  if (page === 'locate') {
+
+    return HtmlService
+      .createTemplateFromFile('LocateCard')
+      .evaluate()
+      .setTitle(
+        CONFIG.SYSTEM_TITLE +
+        ' - Locate Card'
+      )
+      .setXFrameOptionsMode(
+        HtmlService.XFrameOptionsMode.ALLOWALL
+      );
+
+  }
+
+
+  /*
+   * DEFAULT:
+   * EXISTING STORE DASHBOARD
+   */
+
+  return HtmlService
+    .createTemplateFromFile('StoreDashboard')
+    .evaluate()
+    .setTitle(CONFIG.SYSTEM_TITLE)
+    .setXFrameOptionsMode(
+      HtmlService.XFrameOptionsMode.ALLOWALL
+    );
+
+}
+
+
+function include(filename) {
+
+  return HtmlService
+    .createHtmlOutputFromFile(filename)
+    .getContent();
+
+}
+
+
+/*******************************************************
+ * UNIQUE REPORT ID
+ *******************************************************/
+
+function generateRPCUniqueId() {
+
+  const lock =
+    LockService.getScriptLock();
+
+  lock.waitLock(30000);
+
+  try {
+
+    const tz =
+      Session.getScriptTimeZone() ||
+      'Asia/Manila';
+
+    const now =
+      new Date();
+
+    return (
+      'RPC-' +
+      Utilities.formatDate(
+        now,
+        tz,
+        'yyyyMMdd-HHmmss'
+      ) +
+      '-' +
+      Math.floor(
+        1000 + Math.random() * 9000
+      )
+    );
+
+  } finally {
+
+    lock.releaseLock();
+
+  }
+
+}
+
+
+/*******************************************************
+ * PORTAL DATA
+ *******************************************************/
+
+function getStoreMasterData() {
+
+  return getStoreList_().map(function(r) {
+
+    return {
+      area: r[0],
+      storeName: r[1],
+      storeCode: r[2]
+    };
+
+  });
+
+}
+
+
+function getBSCList() {
+
+  return getBSCList_().map(function(r) {
+
+    return {
+      area: r[0],
+      storeName: r[1],
+      storeCode: r[2]
+    };
+
+  });
+
+}
+
+
+function getCompanyLogo() {
+
+  return {
+    dataUrl: getCompanyLogo_()
+  };
+
+}
+
+
+function getPortalData() {
+
+  return {
+    title: CONFIG.SYSTEM_TITLE,
+    footer: CONFIG.FOOTER,
+    stores: getStoreMasterData(),
+    bscs: getBSCList(),
+    logoUrl: getCompanyLogo_()
+  };
+
+}
+
+
+/*******************************************************
+ * COMPANY LOGO
+ *******************************************************/
+
+function getCompanyLogo_() {
+
+  try {
+
+    const folder =
+      DriveApp.getFolderById(
+        CONFIG.COMPANY_LOGO_FOLDER_ID
+      );
+
+    const names = [
+      'company-logo.jpeg',
+      'company-logo.jpg',
+      'company-logo.png'
+    ];
+
+    for (let i = 0; i < names.length; i++) {
+
+      const files =
+        folder.getFilesByName(names[i]);
+
+      if (files.hasNext()) {
+
+        const blob =
+          files.next().getBlob();
+
+        return (
+          'data:' +
+          blob.getContentType() +
+          ';base64,' +
+          Utilities.base64Encode(
+            blob.getBytes()
+          )
+        );
+
+      }
+
+    }
+
+  } catch (e) {
+
+    console.log(
+      'Logo error: ' + e.message
+    );
+
+  }
+
+  return '';
+
+}
+
+
+/*******************************************************
+ * STORE LIST
+ *******************************************************/
+
+function getStoreList_() {
+
+  return [
+
+    ['Area 1','DS TA','100'],
+    ['Area 1','TCM TA','137'],
+    ['Area 1','SMR TA','140'],
+    ['Area 2b','SMR DRG','257'],
+    ['Area 2c','SMR PLG','275'],
+    ['Area 2b','EMR CML','285'],
+    ['Area 2b','SP GBN','289'],
+    ['Area 2b','SMR GBN','295'],
+    ['Area 2a','DS LC','300'],
+    ['Area 2a','SMR RZL','327'],
+    ['Area 2a','SMR LC','340'],
+    ['Area 2b','SMR CTC','343'],
+    ['Area 2b','DS CTC','347'],
+    ['Area 2a','ALB 2','372'],
+    ['Area 2a','RIS','387'],
+    ['Area 4b','DS MBT','400'],
+    ['Area 4b','SMR MBT','417'],
+    ['Area 2b','DS DRG','426'],
+    ['Area 3a','DS IRG','430'],
+    ['Area 4b','DS ARY','455'],
+    ['Area 2c','EMR PLG','457'],
+    ['Area 4b','MSV ARY','460'],
+    ['Area 2a','ALB 3','465'],
+    ['Area 4b','EMR MBT','475'],
+    ['Area 4b','EMR ROS','479'],
+    ['Area 2b','ALB 4','485'],
+    ['Area 1','EMR TIWI','487'],
+    ['Area 2c','MKP PIO','494'],
+    ['Area 3a','SMR IRG','517'],
+    ['Area 3a','SP NBA','526'],
+    ['Area 3c','DS NG','530'],
+    ['Area 3c','EMR MSY','549'],
+    ['Area 3a','SMR NBA','557'],
+    ['Area 3c','SMR IGU','575'],
+    ['Area 3c','SMR NG','585'],
+    ['Area 3b','SMR PILI','595'],
+    ['Area 3b','SMR GOA','612'],
+    ['Area 3b','DS GOA','630'],
+    ['Area 3d','MKP LAB','650'],
+    ['Area 2c','SMR LGO 1','665'],
+    ['Area 2c','SMR LGO 2','670'],
+    ['Area 2c','DS LTC','683'],
+    ['Area 2c','EMR LBN','685'],
+    ['Area 3c','SMR VLA','694'],
+    ['Area 3a','MKP BAAO','704'],
+    ['Area 3c','EMR BBN','714'],
+    ['Area 3c','EMR BBS','715'],
+    ['Area 3a','EMR BUHI','716'],
+    ['Area 3a','EMR ISA','717'],
+    ['Area 3b','SMR LGN','718'],
+    ['Area 4b','TRA SMR MBT','721'],
+    ['Area 3b','DS CLB','735'],
+    ['Area 1','EMR SDO','745'],
+    ['Area 2c','DS PIO','750'],
+    ['Area 3b','SMR CLB','755'],
+    ['Area 3a','SMR BATO','757'],
+    ['Area 1','MSV TA','770'],
+    ['Area 3c','SMR LMA','800'],
+    ['Area 3b','EMR BLC','806'],
+    ['Area 1','SP TA','807'],
+    ['Area 3d','EMR DTE','809'],
+    ['Area 2c','DS PLG2','827'],
+    ['Area 2c','EMR MATACON','832'],
+    ['Area 3b','MKP TBC','833'],
+    ['Area 2c','SMR PLG2','834'],
+    ['Area 3b','EMR SANGAY','852'],
+    ['Area 1','EMR TA','870'],
+    ['Area 3d','SMR RAGAY','872'],
+    ['Area 3d','SMR J.PANG','876'],
+    ['Area 3c','SMR SFL','878'],
+    ['Area 2b','EMR TGS DRG','880'],
+    ['Area 4b','SMR PLACER','887'],
+    ['Area 1','SMR BCY','889'],
+    ['Area 3d','SMR TKY','891'],
+    ['Area 2a','SMR BRD','11201'],
+    ['Area 2c','SMR LGO3','11203'],
+    ['Area 2b','SMR CML -JNA','11205'],
+    ['Area 2b','TAYSAN','11207'],
+    ['Area 1','EMR MALINAO','11209'],
+    ['Area 2b','EMR SLV','11211'],
+    ['Area 2b','ANISLAG-ALG','11213'],
+    ['Area 1','EMR MALILIPOT','11215'],
+    ['Area 1','EMR BOMBON','11217'],
+    ['Area 3d','SMR PARACALE','12114'],
+    ['Area 3c','EMR CANAMAN','12117'],
+    ['Area 3a','SMR NSD','12120'],
+    ['Area 3d','EMR BASUD','12122'],
+    ['Area 3b','EMR TIGAON','12124'],
+    ['Area 3a','SMR IRG2','12894'],
+    ['Area 3d','SMR LKB DAET','12896'],
+    ['Area 3c','SMR CBD NG','12898'],
+    ['Area 4b','DIMASALANG','13021'],
+    ['Area 4b','EMR Danao','13029'],
+    ['Area 4b','MBT CAWAYAN','13890'],
+    ['Area 4b','SMR MGS','13892'],
+    ['Area 4b','SMR MDO','13894'],
+    ['Area 3d','SMR LOPEZ','14001'],
+    ['Area 1','SMR VIRAC','15001'],
+    ['Area 1','DS BCY','21138'],
+    ['Area 3c','DS CBD NG','21141'],
+    ['Area 3c','ESS CBD','21145'],
+    ['Area 4b','BAZAR DS MBT','21150'],
+    ['Area 3a','DS BATO','21153'],
+    ['Area 2c','DS PLG1','21162'],
+    ['Area 2b','DS CML','21168'],
+    ['Area 3d','VS J.PANG','21174'],
+    ['Area 3a','VS IRG','21177'],
+    ['Area 1','VS TIWI','21180'],
+    ['Area 3d','VS J.LAB','21183'],
+    ['Area 3d','DS LOPEZ','24001'],
+
+    ['Area 3b','DS/HC PILI','436/439']
+
+  ];
+
+}
+
+
+/*******************************************************
+ * BSC LIST
+ *******************************************************/
+
+function getBSCList_() {
+
+  return [
+
+    ['Business Center','TA','161'],
+    ['Business Center','DRG','184'],
+    ['Business Center','PLG','193'],
+    ['Business Center','SOR','198'],
+    ['Business Center','LC','361'],
+    ['Business Center','MBT','451'],
+    ['Business Center','NG','661'],
+    ['Business Center','DTE','761'],
+    ['Business Center','LAB','771'],
+    ['Business Center','CTC','786'],
+    ['Business Center','PLI','791'],
+    ['Business Center','LGO','793'],
+    ['Business Center','PIO','861'],
+    ['Business Center','GOA','874'],
+    ['Business Center','CLB','882'],
+    ['Business Center','IGU','883'],
+    ['Business Center','IRS','885'],
+    ['Business Center','BLN','886'],
+    ['Business Center','CBD','61803'],
+    ['Business Center','IRG EVP','61814']
+
+  ];
+
+}
+
+
+/*******************************************************
+ * CARD NUMBER NORMALIZATION
+ *******************************************************/
+
+function normalizeCardNumber_(cardNumber) {
+
+  return String(cardNumber || '')
+    .replace(/\D/g, '')
+    .substring(0, 16);
+
+}
+
+
+function formatCardNumber_(cardNumber) {
+
+  const digits =
+    normalizeCardNumber_(cardNumber);
+
+  return digits.replace(
+    /(\d{4})(?=\d)/g,
+    '$1 '
+  );
+
+}
+
+
+/*******************************************************
+ * CHECK EXISTING CARD NUMBERS
+ *******************************************************/
+
+function checkExistingCardNumbers(cardNumbers) {
+
+  const wanted = Array.from(
+    new Set(
+      (cardNumbers || [])
+        .map(normalizeCardNumber_)
+        .filter(function(n) {
+          return /^\d{16}$/.test(n);
+        })
+    )
+  );
+
+  if (!wanted.length) {
+    return [];
+  }
+
+  const ss =
+    SpreadsheetApp.getActiveSpreadsheet();
+
+  const sheet =
+    ss.getSheetByName(
+      CONFIG.CARD_DATABASE_SHEET
+    );
+
+  if (!sheet) {
+    throw new Error(
+      'Sheet "' +
+      CONFIG.CARD_DATABASE_SHEET +
+      '" was not found.'
+    );
+  }
+
+  if (sheet.getLastRow() < 2) {
+    return [];
+  }
+
+  const values =
+    sheet
+      .getRange(
+        2,
+        7,
+        sheet.getLastRow() - 1,
+        1
+      )
+      .getDisplayValues();
+
+  const existing = {};
+
+  values.forEach(function(row) {
+
+    const number =
+      normalizeCardNumber_(row[0]);
+
+    if (/^\d{16}$/.test(number)) {
+      existing[number] = true;
+    }
+
+  });
+
+  return wanted.filter(function(number) {
+    return existing[number] === true;
+  });
+
+}
+
+
+/*******************************************************
+ * CHECK DUPLICATES INSIDE CURRENT BATCH
+ *******************************************************/
+
+function findBatchDuplicateCards_(cards) {
+
+  const seen = {};
+  const duplicates = {};
+
+  cards.forEach(function(card) {
+
+    const number =
+      normalizeCardNumber_(
+        card.cardNumber
+      );
+
+    if (!number) {
+      return;
+    }
+
+    if (seen[number]) {
+      duplicates[number] = true;
+    }
+
+    seen[number] = true;
+
+  });
+
+  return Object.keys(duplicates);
+
+}
+
+
+/*******************************************************
+ * SAVE CARD BATCH
+ *******************************************************/
+
+function saveCardBatch(batch) {
+
+  if (!batch) {
+    throw new Error(
+      'No report data received.'
+    );
+  }
+
+  const reportId =
+    String(batch.uniqueId || '').trim();
+
+  const storeCode =
+    String(batch.storeCode || '').trim();
+
+  const storeName =
+    String(batch.storeName || '').trim();
+
+  const area =
+    String(batch.area || '').trim();
+
+  const submittedBy =
+    String(batch.processor || '').trim();
+
+  const turnoverType =
+    String(batch.turnoverType || '')
+      .trim()
+      .toUpperCase();
+
+  const turnoverCode =
+    String(batch.turnoverCode || '').trim();
+
+  const turnoverName =
+    String(batch.turnoverName || '').trim();
+
+  const cards =
+    Array.isArray(batch.cards)
+      ? batch.cards
+      : [];
+
+
+  if (!reportId) {
+    throw new Error(
+      'Unique Report ID is required.'
+    );
+  }
+
+  if (!storeCode || !storeName) {
+    throw new Error(
+      'Store Code and Store / Hub Name are required.'
+    );
+  }
+
+  if (!submittedBy) {
+    throw new Error(
+      'Processor / Submitted By is required.'
+    );
+  }
+
+  if (!cards.length) {
+    throw new Error(
+      'At least one card is required.'
+    );
+  }
+
+  if (
+    turnoverType !== 'SAME STORE' &&
+    turnoverType !== 'BSC'
+  ) {
+    throw new Error(
+      'Please select the turn-over destination.'
+    );
+  }
+
+  if (!turnoverCode || !turnoverName) {
+    throw new Error(
+      'Please select the turn-over location.'
+    );
+  }
+
+
+  cards.forEach(function(card) {
+
+    card.cardNumber =
+      normalizeCardNumber_(
+        card.cardNumber
+      );
+
+  });
+
+
+  cards.forEach(function(card, index) {
+
+    if (
+      !/^\d{16}$/.test(
+        String(card.cardNumber || '')
+      )
+    ) {
+
+      throw new Error(
+        'Card #' +
+        (index + 1) +
+        ' must contain exactly 16 digits.'
+      );
+
+    }
+
+    if (!card.imageData) {
+
+      throw new Error(
+        'Card #' +
+        (index + 1) +
+        ' image is required.'
+      );
+
+    }
+
+  });
+
+
+  const batchDuplicates =
+    findBatchDuplicateCards_(cards);
+
+  if (batchDuplicates.length) {
+
+    const formatted =
+      batchDuplicates.map(
+        formatCardNumber_
+      );
+
+    throw new Error(
+      'DUPLICATE CARD NUMBER IN THIS SUBMISSION:\n\n' +
+      formatted.join('\n') +
+      '\n\nThe same card cannot be submitted twice.'
+    );
+
+  }
+
+
+  const cardNumbers =
+    cards.map(function(card) {
+      return card.cardNumber;
+    });
+
+
+  const existingCards =
+    checkExistingCardNumbers(
+      cardNumbers
+    );
+
+
+  if (existingCards.length) {
+
+    const formatted =
+      existingCards.map(
+        formatCardNumber_
+      );
+
+    throw new Error(
+      'CARD ALREADY REPORTED:\n\n' +
+      formatted.join('\n') +
+      '\n\nThe submission was not saved.'
+    );
+
+  }
+
+
+  const lock =
+    LockService.getScriptLock();
+
+  lock.waitLock(30000);
+
+  try {
+
+    const existingAfterLock =
+      checkExistingCardNumbers(
+        cardNumbers
+      );
+
+    if (existingAfterLock.length) {
+
+      const formatted =
+        existingAfterLock.map(
+          formatCardNumber_
+        );
+
+      throw new Error(
+        'CARD ALREADY REPORTED:\n\n' +
+        formatted.join('\n') +
+        '\n\nThe submission was not saved.'
+      );
+
+    }
+
+
+    const imageFolder =
+      DriveApp.getFolderById(
+        CONFIG.CARD_IMAGES_FOLDER_ID
+      );
+
+    const ocrFolder =
+      DriveApp.getFolderById(
+        CONFIG.OCR_FOLDER_ID
+      );
+
+    const timestamp =
+      new Date();
+
+    const saved = [];
+
+
+    cards.forEach(function(card, index) {
+
+      const parsed =
+        parseDataUrl_(
+          card.imageData
+        );
+
+
+      const filename =
+        reportId +
+        '_CARD' +
+        String(index + 1).padStart(2, '0') +
+        '_' +
+        card.cardNumber +
+        '.' +
+        getExtensionFromMime_(
+          parsed.mimeType
+        );
+
+
+      const imageBlob =
+        Utilities.newBlob(
+          parsed.bytes,
+          parsed.mimeType,
+          filename
+        );
+
+
+      const imageFile =
+        imageFolder.createFile(
+          imageBlob
+        );
+
+
+      const ocrContent = [
+
+        CONFIG.SYSTEM_TITLE,
+        '',
+
+        'Unique Report ID: ' +
+          reportId,
+
+        'Card Sequence: ' +
+          (index + 1),
+
+        'Card Number: ' +
+          card.cardNumber,
+
+        'Card Number Display: ' +
+          formatCardNumber_(
+            card.cardNumber
+          ),
+
+        'Store Code: ' +
+          storeCode,
+
+        'Store / Hub Name: ' +
+          storeName,
+
+        'Area: ' +
+          area,
+
+        'Processor / Submitted By: ' +
+          submittedBy,
+
+        'Turn-over To: ' +
+          turnoverType,
+
+        'Turn-over Code: ' +
+          turnoverCode,
+
+        'Turn-over Location: ' +
+          turnoverName,
+
+        '',
+
+        'OCR Source: Tesseract.js Browser OCR',
+
+        '',
+
+        'OCR RAW RESULT:',
+
+        String(
+          card.ocrRawText || ''
+        )
+
+      ].join('\n');
+
+
+      const ocrFile =
+        ocrFolder.createFile(
+          reportId +
+          '_CARD' +
+          String(index + 1).padStart(2, '0') +
+          '_OCR.txt',
+
+          ocrContent,
+
+          MimeType.PLAIN_TEXT
+        );
+
+
+      saved.push({
+
+        sequence:
+          index + 1,
+
+        cardNumber:
+          card.cardNumber,
+
+        cardNumberDisplay:
+          formatCardNumber_(
+            card.cardNumber
+          ),
+
+        imageBlob:
+          imageBlob,
+
+        imageFile:
+          imageFile,
+
+        ocrFile:
+          ocrFile
+
+      });
+
+    });
+
+
+    const pdf =
+      createLbcRpcBatchPdf_({
+
+        reportId:
+          reportId,
+
+        timestamp:
+          timestamp,
+
+        storeCode:
+          storeCode,
+
+        storeName:
+          storeName,
+
+        area:
+          area,
+
+        submittedBy:
+          submittedBy,
+
+        turnoverType:
+          turnoverType,
+
+        turnoverCode:
+          turnoverCode,
+
+        turnoverName:
+          turnoverName,
+
+        cards:
+          saved
+
+      });
+
+
+    const emailStatus =
+      sendMainOfficeBatchEmail_({
+
+        reportId:
+          reportId,
+
+        storeCode:
+          storeCode,
+
+        storeName:
+          storeName,
+
+        area:
+          area,
+
+        submittedBy:
+          submittedBy,
+
+        turnoverType:
+          turnoverType,
+
+        turnoverCode:
+          turnoverCode,
+
+        turnoverName:
+          turnoverName,
+
+        cards:
+          saved,
+
+        pdfBlob:
+          pdf.blob
+
+      });
+
+
+    saveBatchToCardDatabase_({
+
+      reportId:
+        reportId,
+
+      timestamp:
+        timestamp,
+
+      storeCode:
+        storeCode,
+
+      storeName:
+        storeName,
+
+      area:
+        area,
+
+      submittedBy:
+        submittedBy,
+
+      turnoverType:
+        turnoverType,
+
+      turnoverCode:
+        turnoverCode,
+
+      turnoverName:
+        turnoverName,
+
+      cards:
+        saved,
+
+      pdfFileId:
+        pdf.fileId,
+
+      pdfUrl:
+        pdf.url,
+
+      emailStatus:
+        emailStatus
+
+    });
+
+
+    return {
+
+      success:
+        true,
+
+      count:
+        saved.length,
+
+      reportId:
+        reportId,
+
+      pdfFileId:
+        pdf.fileId,
+
+      pdfUrl:
+        pdf.url,
+
+      emailStatus:
+        emailStatus,
+
+      cards:
+        saved.map(function(card) {
+
+          return {
+
+            sequence:
+              card.sequence,
+
+            cardNumber:
+              card.cardNumber,
+
+            cardNumberDisplay:
+              card.cardNumberDisplay
+
+          };
+
+        })
+
+    };
+
+  } finally {
+
+    lock.releaseLock();
+
+  }
+
+}
+
+
+/*******************************************************
+ * SAVE TO CARD DATABASE
+ *******************************************************/
+
+function saveBatchToCardDatabase_(data) {
+
+  const sheet =
+    SpreadsheetApp
+      .getActiveSpreadsheet()
+      .getSheetByName(
+        CONFIG.CARD_DATABASE_SHEET
+      );
+
+
+  if (!sheet) {
+
+    throw new Error(
+      'Sheet "' +
+      CONFIG.CARD_DATABASE_SHEET +
+      '" was not found.'
+    );
+
+  }
+
+
+  const headers = [
+
+    'Unique ID',
+    'Timestamp',
+    'Store Code',
+    'Store / Hub Name',
+    'Area',
+    'Processor / Submitted By',
+    'Card Number',
+    'Image File ID',
+    'Image URL',
+    'Status',
+    'Email Address',
+    'PDF File ID',
+    'PDF URL',
+    'PDF Status',
+    'Turn-over To',
+    'Turn-over Code',
+    'Turn-over Location',
+    'Card Sequence'
+
+  ];
+
+
+  if (sheet.getLastRow() === 0) {
+
+    sheet
+      .getRange(
+        1,
+        1,
+        1,
+        headers.length
+      )
+      .setValues([headers]);
+
+  } else {
+
+    const current =
+      sheet
+        .getRange(
+          1,
+          1,
+          1,
+          Math.max(
+            sheet.getLastColumn(),
+            headers.length
+          )
+        )
+        .getDisplayValues()[0];
+
+
+    headers.forEach(function(h, i) {
+
+      if (!current[i]) {
+
+        sheet
+          .getRange(
+            1,
+            i + 1
+          )
+          .setValue(h);
+
+      }
+
+    });
+
+  }
+
+
+  const rows =
+    data.cards.map(function(c) {
+
+      return [
+
+        data.reportId,
+        data.timestamp,
+        data.storeCode,
+        data.storeName,
+        data.area,
+        data.submittedBy,
+
+        c.cardNumber,
+
+        c.imageFile.getId(),
+        c.imageFile.getUrl(),
+
+        'REPORTED',
+
+        '',
+
+        data.pdfFileId,
+        data.pdfUrl,
+
+        'GENERATED',
+
+        data.turnoverType,
+        data.turnoverCode,
+        data.turnoverName,
+
+        c.sequence
+
+      ];
+
+    });
+
+
+  sheet
+    .getRange(
+      Math.max(
+        sheet.getLastRow() + 1,
+        2
+      ),
+      1,
+      rows.length,
+      headers.length
+    )
+    .setValues(rows);
+
+}
+
+
+/*******************************************************
+ * CREATE PDF
+ *******************************************************/
+
+function createLbcRpcBatchPdf_(data) {
+
+  const folder =
+    DriveApp.getFolderById(
+      CONFIG.PDF_REPORTS_FOLDER_ID
+    );
+
+
+  const doc =
+    DocumentApp.create(
+      'TEMP_' + data.reportId
+    );
+
+
+  const body =
+    doc.getBody();
+
+
+  body.setMarginTop(36);
+  body.setMarginBottom(36);
+  body.setMarginLeft(42);
+  body.setMarginRight(42);
+
+
+  const headerTable =
+    body.appendTable([
+      ['', '']
+    ]);
+
+  headerTable.setBorderWidth(0);
+
+
+  const logoCell =
+    headerTable.getCell(0, 0);
+
+  const titleCell =
+    headerTable.getCell(0, 1);
+
+
+  try {
+
+    const logoBlob =
+      getCompanyLogoBlob_();
+
+    if (logoBlob) {
+
+      const logo =
+        logoCell.appendImage(
+          logoBlob
+        );
+
+      const maxLogoWidth = 85;
+
+      if (
+        logo.getWidth() >
+        maxLogoWidth
+      ) {
+
+        const ratio =
+          maxLogoWidth /
+          logo.getWidth();
+
+        logo.setWidth(
+          maxLogoWidth
+        );
+
+        logo.setHeight(
+          Math.round(
+            logo.getHeight() *
+            ratio
+          )
+        );
+
+      }
+
+    }
+
+  } catch (logoError) {
+
+    // Continue without logo.
+
+  }
+
+
+  const brand =
+    titleCell.appendParagraph(
+      CONFIG.SYSTEM_TITLE
+    );
+
+  brand.setBold(true);
+  brand.setFontSize(18);
+  brand.setForegroundColor(
+    '#006FBA'
+  );
+
+
+  const subtitle =
+    titleCell.appendParagraph(
+      'LBC-RPC CARD REPORT'
+    );
+
+  subtitle.setBold(true);
+  subtitle.setFontSize(10);
+  subtitle.setForegroundColor(
+    '#555555'
+  );
+
+
+  const confidentiality =
+    titleCell.appendParagraph(
+      'INTERNAL CONTROL DOCUMENT'
+    );
+
+  confidentiality.setFontSize(8);
+  confidentiality.setForegroundColor(
+    '#777777'
+  );
+
+
+  body.appendParagraph('');
+
+
+  const banner =
+    body.appendTable([
+      [
+        'LBC-RPC REPORT',
+        data.reportId
+      ]
+    ]);
+
+  banner.setBorderWidth(0);
+
+
+  banner.getCell(0, 0)
+    .setBackgroundColor(
+      '#006FBA'
+    );
+
+  banner.getCell(0, 1)
+    .setBackgroundColor(
+      '#006FBA'
+    );
+
+
+  const bannerTitle =
+    banner
+      .getCell(0, 0)
+      .getChild(0)
+      .asParagraph();
+
+  bannerTitle.setBold(true);
+  bannerTitle.setFontSize(12);
+  bannerTitle.setForegroundColor(
+    '#FFFFFF'
+  );
+
+
+  const bannerId =
+    banner
+      .getCell(0, 1)
+      .getChild(0)
+      .asParagraph();
+
+  bannerId.setBold(true);
+  bannerId.setFontSize(11);
+  bannerId.setForegroundColor(
+    '#FFFFFF'
+  );
+
+  bannerId.setAlignment(
+    DocumentApp.HorizontalAlignment.RIGHT
+  );
+
+
+  body.appendParagraph('');
+
+
+  appendCorporateSectionHeading_(
+    body,
+    'REPORT INFORMATION'
+  );
+
+
+  const infoRows = [
+
+    [
+      'Unique Report ID',
+      data.reportId
+    ],
+
+    [
+      'Timestamp',
+      formatDateTime_(
+        data.timestamp
+      )
+    ],
+
+    [
+      'Originating Store Code',
+      data.storeCode
+    ],
+
+    [
+      'Originating Store / Hub',
+      data.storeName
+    ],
+
+    [
+      'Area',
+      data.area
+    ],
+
+    [
+      'Processor / Submitted By',
+      data.submittedBy
+    ],
+
+    [
+      'Turn-over To',
+      data.turnoverType
+    ],
+
+    [
+      'Destination Code',
+      data.turnoverCode
+    ],
+
+    [
+      'Destination Name',
+      data.turnoverName
+    ],
+
+    [
+      'Destination Type',
+      data.turnoverType === 'BSC'
+        ? 'BUSINESS CENTER (BSC)'
+        : 'STORE'
+    ],
+
+    [
+      'Cards Submitted',
+      String(
+        data.cards.length
+      )
+    ]
+
+  ];
+
+
+  const infoTable =
+    body.appendTable(
+      infoRows
+    );
+
+  infoTable.setBorderColor(
+    '#D9E2F3'
+  );
+
+  infoTable.setBorderWidth(1);
+
+
+  for (
+    let r = 0;
+    r < infoRows.length;
+    r++
+  ) {
+
+    const labelCell =
+      infoTable.getCell(r, 0);
+
+    const valueCell =
+      infoTable.getCell(r, 1);
+
+
+    labelCell.setBackgroundColor(
+      '#F2F6FA'
+    );
+
+
+    const label =
+      labelCell
+        .getChild(0)
+        .asParagraph();
+
+    label.setBold(true);
+    label.setFontSize(9);
+    label.setForegroundColor(
+      '#24445C'
+    );
+
+
+    const value =
+      valueCell
+        .getChild(0)
+        .asParagraph();
+
+    value.setFontSize(9);
+    value.setForegroundColor(
+      '#222222'
+    );
+
+  }
+
+
+  body.appendParagraph('');
+
+
+  appendCorporateSectionHeading_(
+    body,
+    'CARD SUMMARY'
+  );
+
+
+  const summaryHeader = [
+
+    'Sequence',
+    '16-Digit Card Number',
+    'Validation',
+    'Status'
+
+  ];
+
+
+  const summaryRows =
+    [summaryHeader];
+
+
+  data.cards.forEach(function(card) {
+
+    summaryRows.push([
+
+      'CARD ' +
+        card.sequence,
+
+      formatCardNumber_(
+        card.cardNumber
+      ),
+
+      /^\d{16}$/.test(
+        String(
+          card.cardNumber || ''
+        )
+      )
+        ? 'VALIDATED'
+        : 'REVIEW',
+
+      'REPORTED'
+
+    ]);
+
+  });
+
+
+  const summaryTable =
+    body.appendTable(
+      summaryRows
+    );
+
+  summaryTable.setBorderColor(
+    '#C9D5E2'
+  );
+
+  summaryTable.setBorderWidth(1);
+
+
+  for (
+    let c = 0;
+    c < summaryHeader.length;
+    c++
+  ) {
+
+    const cell =
+      summaryTable.getCell(0, c);
+
+    cell.setBackgroundColor(
+      '#006FBA'
+    );
+
+    const p =
+      cell
+        .getChild(0)
+        .asParagraph();
+
+    p.setBold(true);
+    p.setFontSize(8);
+    p.setForegroundColor(
+      '#FFFFFF'
+    );
+
+  }
+
+
+  for (
+    let r = 1;
+    r < summaryRows.length;
+    r++
+  ) {
+
+    for (
+      let c = 0;
+      c < summaryHeader.length;
+      c++
+    ) {
+
+      const p =
+        summaryTable
+          .getCell(r, c)
+          .getChild(0)
+          .asParagraph();
+
+      p.setFontSize(8);
+
+      if (c === 2) {
+
+        p.setBold(true);
+
+        p.setForegroundColor(
+          '#006FBA'
+        );
+
+      }
+
+    }
+
+  }
+
+
+  body.appendParagraph('');
+
+
+  appendCorporateSectionHeading_(
+    body,
+    'CARD DETAILS'
+  );
+
+
+  data.cards.forEach(
+    function(card, index) {
+
+      if (index > 0) {
+
+        body.appendPageBreak();
+
+        appendCorporateSectionHeading_(
+          body,
+          'CARD ' +
+          card.sequence +
+          ' OF ' +
+          data.cards.length
+        );
+
+      } else {
+
+        const cardHeading =
+          body.appendParagraph(
+            'CARD 1 OF ' +
+            data.cards.length
+          );
+
+        cardHeading.setBold(true);
+        cardHeading.setFontSize(12);
+        cardHeading.setForegroundColor(
+          '#006FBA'
+        );
+
+      }
+
+
+      const cardInfo =
+        body.appendTable([
+
+          [
+            'Card Sequence',
+            'CARD ' +
+              card.sequence
+          ],
+
+          [
+            'Card Number',
+            formatCardNumber_(
+              card.cardNumber
+            )
+          ],
+
+          [
+            'OCR Engine',
+            'Tesseract.js — Browser OCR'
+          ],
+
+          [
+            'Validation',
+            /^\d{16}$/.test(
+              String(
+                card.cardNumber || ''
+              )
+            )
+              ? '16-DIGIT NUMBER VALIDATED'
+              : 'REVIEW REQUIRED'
+          ],
+
+          [
+            'Workflow Status',
+            'REPORTED'
+          ]
+
+        ]);
+
+
+      cardInfo.setBorderColor(
+        '#D9E2F3'
+      );
+
+      cardInfo.setBorderWidth(1);
+
+
+      for (
+        let r = 0;
+        r < 5;
+        r++
+      ) {
+
+        cardInfo
+          .getCell(r, 0)
+          .setBackgroundColor(
+            '#F2F6FA'
+          );
+
+
+        const lp =
+          cardInfo
+            .getCell(r, 0)
+            .getChild(0)
+            .asParagraph();
+
+        lp.setBold(true);
+        lp.setFontSize(9);
+        lp.setForegroundColor(
+          '#24445C'
+        );
+
+
+        const vp =
+          cardInfo
+            .getCell(r, 1)
+            .getChild(0)
+            .asParagraph();
+
+        vp.setFontSize(9);
+
+
+        if (r === 1) {
+
+          vp.setBold(true);
+          vp.setFontSize(12);
+
+        }
+
+
+        if (r === 3) {
+
+          vp.setBold(true);
+          vp.setForegroundColor(
+            '#006FBA'
+          );
+
+        }
+
+      }
+
+
+      body.appendParagraph('');
+
+
+      const imageHeading =
+        body.appendParagraph(
+          'CAPTURED CARD IMAGE'
+        );
+
+      imageHeading.setBold(true);
+      imageHeading.setFontSize(9);
+      imageHeading.setForegroundColor(
+        '#555555'
+      );
+
+
+      try {
+
+        const image =
+          body.appendImage(
+            card.imageBlob
+          );
+
+        const maxWidth = 430;
+        const maxHeight = 300;
+
+        let width =
+          image.getWidth();
+
+        let height =
+          image.getHeight();
+
+
+        if (width > maxWidth) {
+
+          const ratio =
+            maxWidth / width;
+
+          width = maxWidth;
+
+          height =
+            Math.round(
+              height * ratio
+            );
+
+        }
+
+
+        if (height > maxHeight) {
+
+          const ratio =
+            maxHeight / height;
+
+          height = maxHeight;
+
+          width =
+            Math.round(
+              width * ratio
+            );
+
+        }
+
+
+        image.setWidth(width);
+        image.setHeight(height);
+
+
+      } catch (imageError) {
+
+        const p =
+          body.appendParagraph(
+            'Card image could not be embedded.'
+          );
+
+        p.setItalic(true);
+
+        p.setForegroundColor(
+          '#A00000'
+        );
+
+      }
+
+
+      body.appendParagraph('');
+
+
+      const review =
+        body.appendTable([
+
+          [
+            'REVIEW CHECK',
+            'RESULT'
+          ],
+
+          [
+            '16-digit card number',
+            /^\d{16}$/.test(
+              String(
+                card.cardNumber || ''
+              )
+            )
+              ? 'PASS'
+              : 'REVIEW'
+          ],
+
+          [
+            'Card image captured / uploaded',
+            'PASS'
+          ],
+
+          [
+            'OCR source',
+            'Tesseract.js Browser OCR'
+          ]
+
+        ]);
+
+
+      review.setBorderColor(
+        '#D9E2F3'
+      );
+
+      review.setBorderWidth(1);
+
+
+      for (
+        let c = 0;
+        c < 2;
+        c++
+      ) {
+
+        const p =
+          review
+            .getCell(0, c)
+            .getChild(0)
+            .asParagraph();
+
+        p.setBold(true);
+        p.setFontSize(8);
+        p.setForegroundColor(
+          '#FFFFFF'
+        );
+
+        review
+          .getCell(0, c)
+          .setBackgroundColor(
+            '#006FBA'
+          );
+
+      }
+
+
+      for (
+        let r = 1;
+        r < 4;
+        r++
+      ) {
+
+        for (
+          let c = 0;
+          c < 2;
+          c++
+        ) {
+
+          const p =
+            review
+              .getCell(r, c)
+              .getChild(0)
+              .asParagraph();
+
+          p.setFontSize(8);
+
+        }
+
+      }
+
+    }
+  );
+
+
+  body.appendPageBreak();
+
+
+  appendCorporateSectionHeading_(
+    body,
+    'TRANSACTION CONTROL'
+  );
+
+
+  const controlTable =
+    body.appendTable([
+
+      [
+        'Report ID',
+        data.reportId
+      ],
+
+      [
+        'Total Cards',
+        String(
+          data.cards.length
+        )
+      ],
+
+      [
+        'Originating Location',
+        data.storeCode +
+        ' - ' +
+        data.storeName
+      ],
+
+      [
+        'Turn-over Destination',
+        data.turnoverCode +
+        ' - ' +
+        data.turnoverName
+      ],
+
+      [
+        'Destination Type',
+        data.turnoverType === 'BSC'
+          ? 'BUSINESS CENTER'
+          : 'SAME STORE'
+      ],
+
+      [
+        'Submission Status',
+        'SUBMITTED / REPORTED'
+      ],
+
+      [
+        'PDF Generated',
+        'YES'
+      ]
+
+    ]);
+
+
+  controlTable.setBorderColor(
+    '#D9E2F3'
+  );
+
+  controlTable.setBorderWidth(1);
+
+
+  for (
+    let r = 0;
+    r < 7;
+    r++
+  ) {
+
+    controlTable
+      .getCell(r, 0)
+      .setBackgroundColor(
+        '#F2F6FA'
+      );
+
+
+    const lp =
+      controlTable
+        .getCell(r, 0)
+        .getChild(0)
+        .asParagraph();
+
+    lp.setBold(true);
+    lp.setFontSize(9);
+    lp.setForegroundColor(
+      '#24445C'
+    );
+
+
+    const vp =
+      controlTable
+        .getCell(r, 1)
+        .getChild(0)
+        .asParagraph();
+
+    vp.setFontSize(9);
+
+  }
+
+
+  body.appendParagraph('');
+
+
+  const note =
+    body.appendParagraph(
+      'This document is system-generated from the LBC-RPC Portal. ' +
+      'The card number was captured and validated through the portal workflow. ' +
+      'Retain this report as part of the card custody and movement record.'
+    );
+
+
+  note.setFontSize(8);
+
+  note.setForegroundColor(
+    '#666666'
+  );
+
+
+  body.appendParagraph('');
+
+
+  const footerLine =
+    body.appendParagraph(
+      CONFIG.FOOTER
+    );
+
+  footerLine.setAlignment(
+    DocumentApp.HorizontalAlignment.CENTER
+  );
+
+  footerLine.setFontSize(8);
+
+  footerLine.setForegroundColor(
+    '#777777'
+  );
+
+
+  doc.saveAndClose();
+
+
+  const docFile =
+    DriveApp.getFileById(
+      doc.getId()
+    );
+
+
+  const pdfBlob =
+    docFile
+      .getAs(MimeType.PDF)
+      .setName(
+        data.reportId +
+        '_LBC-RPC_REPORT.pdf'
+      );
+
+
+  const pdfFile =
+    folder.createFile(
+      pdfBlob
+    );
+
+
+  docFile.setTrashed(true);
+
+
+  return {
+
+    fileId:
+      pdfFile.getId(),
+
+    url:
+      pdfFile.getUrl(),
+
+    blob:
+      pdfBlob
+
+  };
+
+}
+
+
+/*******************************************************
+ * PDF SECTION HEADING
+ *******************************************************/
+
+function appendCorporateSectionHeading_(
+  body,
+  text
+) {
+
+  const table =
+    body.appendTable([
+      [text]
+    ]);
+
+  table.setBorderWidth(0);
+
+
+  table
+    .getCell(0, 0)
+    .setBackgroundColor(
+      '#006FBA'
+    );
+
+
+  const p =
+    table
+      .getCell(0, 0)
+      .getChild(0)
+      .asParagraph();
+
+
+  p.setBold(true);
+  p.setFontSize(10);
+  p.setForegroundColor(
+    '#FFFFFF'
+  );
+
+
+  body.appendParagraph('');
+
+}
+
+
+/*******************************************************
+ * GET COMPANY LOGO BLOB
+ *******************************************************/
+
+function getCompanyLogoBlob_() {
+
+  try {
+
+    const folder =
+      DriveApp.getFolderById(
+        CONFIG.COMPANY_LOGO_FOLDER_ID
+      );
+
+
+    const names = [
+      'company-logo.jpeg',
+      'company-logo.jpg',
+      'company-logo.png'
+    ];
+
+
+    for (
+      let i = 0;
+      i < names.length;
+      i++
+    ) {
+
+      const files =
+        folder.getFilesByName(
+          names[i]
+        );
+
+
+      if (files.hasNext()) {
+
+        return files.next().getBlob();
+
+      }
+
+    }
+
+
+  } catch (e) {
+
+    console.log(
+      'PDF logo error: ' +
+      e.message
+    );
+
+  }
+
+
+  return null;
+
+}
+
+
+/*******************************************************
+ * EMAIL AUTHORIZATION
+ *******************************************************/
+
+function authorizeLbcRpcEmail() {
+
+  const quota =
+    MailApp.getRemainingDailyQuota();
+
+
+  Logger.log(
+    'Mail authorization successful. ' +
+    'Remaining daily quota: ' +
+    quota
+  );
+
+
+  return 'EMAIL AUTHORIZATION OK';
+
+}
+
+
+/*******************************************************
+ * GET MAIN OFFICE EMAIL RECIPIENTS
+ *******************************************************/
+
+function getMainOfficeEmailRecipients_() {
+
+  const ss =
+    SpreadsheetApp.getActiveSpreadsheet();
+
+
+  const sheet =
+    ss.getSheetByName(
+      CONFIG.EMAIL_SHEET
+    );
+
+
+  if (!sheet) {
+
+    throw new Error(
+      'Sheet "' +
+      CONFIG.EMAIL_SHEET +
+      '" was not found.'
+    );
+
+  }
+
+
+  const lastRow =
+    sheet.getLastRow();
+
+  const lastCol =
+    sheet.getLastColumn();
+
+
+  if (
+    lastRow < 2 ||
+    lastCol < 1
+  ) {
+
+    throw new Error(
+      'Sheet "' +
+      CONFIG.EMAIL_SHEET +
+      '" has no recipient records.'
+    );
+
+  }
+
+
+  const values =
+    sheet
+      .getRange(
+        1,
+        1,
+        lastRow,
+        lastCol
+      )
+      .getDisplayValues();
+
+
+  const headers =
+    values[0].map(function(h) {
+
+      return String(
+        h || ''
+      )
+        .trim()
+        .toLowerCase();
+
+    });
+
+
+  const emailCol =
+    headers.indexOf('email');
+
+
+  if (emailCol === -1) {
+
+    throw new Error(
+      'The "Email" column was not found in sheet "' +
+      CONFIG.EMAIL_SHEET +
+      '".'
+    );
+
+  }
+
+
+  const emails = [];
+
+
+  for (
+    let r = 1;
+    r < values.length;
+    r++
+  ) {
+
+    const email =
+      String(
+        values[r][emailCol] || ''
+      ).trim();
+
+
+    if (
+      email &&
+      /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
+        email
+      )
+    ) {
+
+      emails.push(email);
+
+    }
+
+  }
+
+
+  return Array.from(
+    new Set(emails)
+  );
+
+}
+
+
+/*******************************************************
+ * SEND MAIN OFFICE EMAIL
+ *******************************************************/
+
+function sendMainOfficeBatchEmail_(data) {
+
+  try {
+
+    const recipients =
+      getMainOfficeEmailRecipients_();
+
+
+    if (!recipients.length) {
+
+      return (
+        'EMAIL ERROR: ' +
+        'No valid email addresses found in the Email sheet.'
+      );
+
+    }
+
+
+    const cards =
+      data.cards
+        .map(function(c) {
+
+          return (
+            'Card #' +
+            c.sequence +
+            ': ' +
+            formatCardNumber_(
+              c.cardNumber
+            )
+          );
+
+        })
+        .join('\n');
+
+
+    const body = [
+
+      CONFIG.SYSTEM_TITLE,
+
+      '',
+
+      'LBC-RPC REPORT',
+
+      '',
+
+      'Unique Report ID: ' +
+        data.reportId,
+
+      'Store Code: ' +
+        data.storeCode,
+
+      'Store / Hub Name: ' +
+        data.storeName,
+
+      'Area: ' +
+        data.area,
+
+      'Processor / Submitted By: ' +
+        data.submittedBy,
+
+      'Turn-over To: ' +
+        data.turnoverType,
+
+      'Turn-over Code: ' +
+        data.turnoverCode,
+
+      'Turn-over Location: ' +
+        data.turnoverName,
+
+      '',
+
+      'CARD NUMBERS:',
+
+      cards,
+
+      '',
+
+      'Please see the attached PDF report.',
+
+      '',
+
+      CONFIG.FOOTER
+
+    ].join('\n');
+
+
+    MailApp.sendEmail({
+
+      to:
+        recipients.join(','),
+
+      subject:
+        'LBC-RPC Report - ' +
+        data.reportId +
+        ' - ' +
+        data.cards.length +
+        ' Card(s)',
+
+      body:
+        body,
+
+      attachments:
+        [data.pdfBlob],
+
+      name:
+        CONFIG.SYSTEM_TITLE
+
+    });
+
+
+    return (
+      'EMAIL SENT TO: ' +
+      recipients.join(', ')
+    );
+
+
+  } catch (e) {
+
+    return (
+      'EMAIL ERROR: ' +
+      e.message
+    );
+
+  }
+
+}
+
+
+/*******************************************************
+ * PDF FIELD HELPER
+ *******************************************************/
+
+function addPdfField_(
+  body,
+  label,
+  value
+) {
+
+  const p =
+    body.appendParagraph('');
+
+
+  const t =
+    p.appendText(
+      label + ': '
+    );
+
+
+  t.setBold(true);
+
+
+  p.appendText(
+    String(value || '')
+  );
+
+}
+
+
+/*******************************************************
+ * PARSE DATA URL
+ *******************************************************/
+
+function parseDataUrl_(dataUrl) {
+
+  const m =
+    String(dataUrl || '')
+      .match(
+        /^data:([^;]+);base64,(.+)$/
+      );
+
+
+  if (!m) {
+
+    throw new Error(
+      'Invalid card image data.'
+    );
+
+  }
+
+
+  return {
+
+    mimeType:
+      m[1],
+
+    bytes:
+      Utilities.base64Decode(
+        m[2]
+      )
+
+  };
+
+}
+
+
+/*******************************************************
+ * FILE EXTENSION
+ *******************************************************/
+
+function getExtensionFromMime_(mime) {
+
+  return {
+
+    'image/jpeg':
+      'jpg',
+
+    'image/jpg':
+      'jpg',
+
+    'image/png':
+      'png',
+
+    'image/webp':
+      'webp',
+
+    'image/heic':
+      'heic'
+
+  }[mime] || 'jpg';
+
+}
+
+
+/*******************************************************
+ * DATE / TIME
+ *******************************************************/
+
+function formatDateTime_(date) {
+
+  return Utilities.formatDate(
+
+    date,
+
+    Session.getScriptTimeZone() ||
+      'Asia/Manila',
+
+    'MM/dd/yyyy hh:mm:ss a'
+
+  );
+
+}
+
+
+/*******************************************************
+ * =====================================================
+ * LOCATE CARD MODULE
+ * =====================================================
+ *
+ * PURPOSE:
+ * Search the CARD DATABASE using the 16-digit
+ * Card Number stored in Column G.
+ *
+ * IMPORTANT:
+ * This module does NOT create:
+ * - PDF
+ * - Email
+ * - Image
+ * - New database records
+ *
+ * It ONLY reads the CARD DATABASE.
+ *
+ * CARD DATABASE COLUMNS:
+ *
+ * A = Unique ID
+ * B = Timestamp
+ * C = Store Code
+ * D = Store / Hub Name
+ * E = Area
+ * F = Processor / Submitted By
+ * G = Card Number
+ * H = Image File ID
+ * I = Image URL
+ * J = Status
+ * K = Email Address
+ * L = PDF File ID
+ * M = PDF URL
+ * N = PDF Status
+ * O = Turn-over To
+ * P = Turn-over Code
+ * Q = Turn-over Location
+ * R = Card Sequence
+ *******************************************************/
+
+
+/*******************************************************
+ * LOCATE CARD
+ *******************************************************/
+
+function locateCard(cardNumber) {
+
+  /*
+   * Normalize the number.
+   *
+   * Example:
+   * 5000 0000 0898 7462
+   *
+   * becomes:
+   * 5000000008987462
+   */
+
+  const wantedCard =
+    normalizeCardNumber_(cardNumber);
+
+
+  /*
+   * Validate exactly 16 digits.
+   */
+
+  if (!/^\d{16}$/.test(wantedCard)) {
+
+    throw new Error(
+      'Please enter exactly 16 digits.'
+    );
+
+  }
+
+
+  /*
+   * Open active spreadsheet.
+   */
+
+  const ss =
+    SpreadsheetApp.getActiveSpreadsheet();
+
+
+  /*
+   * Get CARD DATABASE.
+   */
+
+  const sheet =
+    ss.getSheetByName(
+      CONFIG.CARD_DATABASE_SHEET
+    );
+
+
+  if (!sheet) {
+
+    throw new Error(
+      'Sheet "' +
+      CONFIG.CARD_DATABASE_SHEET +
+      '" was not found.'
+    );
+
+  }
+
+
+  /*
+   * Check if there are records.
+   */
+
+  const lastRow =
+    sheet.getLastRow();
+
+
+  if (lastRow < 2) {
+
+    return {
+      found: false
+    };
+
+  }
+
+
+  /*
+   * Read Columns A:R.
+   */
+
+  const values =
+    sheet
+      .getRange(
+        2,
+        1,
+        lastRow - 1,
+        18
+      )
+      .getDisplayValues();
+
+
+  /*
+   * Search Column G.
+   *
+   * Column G = index 6
+   */
+
+  for (
+    let i = 0;
+    i < values.length;
+    i++
+  ) {
+
+    const row =
+      values[i];
+
+
+    const databaseCard =
+      normalizeCardNumber_(
+        row[6]
+      );
+
+
+    if (
+      databaseCard === wantedCard
+    ) {
+
+
+      /*
+       * CARD FOUND
+       */
+
+      return {
+
+        found: true,
+
+        /*
+         * A
+         */
+        uniqueId:
+          row[0] || '',
+
+        /*
+         * B
+         */
+        timestamp:
+          row[1] || '',
+
+        /*
+         * C
+         */
+        storeCode:
+          row[2] || '',
+
+        /*
+         * D
+         */
+        storeName:
+          row[3] || '',
+
+        /*
+         * E
+         */
+        area:
+          row[4] || '',
+
+        /*
+         * F
+         */
+        processor:
+          row[5] || '',
+
+        /*
+         * G
+         */
+        cardNumber:
+          databaseCard,
+
+        /*
+         * Display value
+         */
+        cardNumberDisplay:
+          formatCardNumber_(
+            databaseCard
+          ),
+
+        /*
+         * H
+         */
+        imageFileId:
+          row[7] || '',
+
+        /*
+         * I
+         */
+        imageUrl:
+          row[8] || '',
+
+        /*
+         * J
+         */
+        status:
+          row[9] || '',
+
+        /*
+         * K
+         */
+        emailAddress:
+          row[10] || '',
+
+        /*
+         * L
+         */
+        pdfFileId:
+          row[11] || '',
+
+        /*
+         * M
+         */
+        pdfUrl:
+          row[12] || '',
+
+        /*
+         * N
+         */
+        pdfStatus:
+          row[13] || '',
+
+        /*
+         * O
+         */
+        turnoverType:
+          row[14] || '',
+
+        /*
+         * P
+         */
+        turnoverCode:
+          row[15] || '',
+
+        /*
+         * Q
+         */
+        turnoverLocation:
+          row[16] || '',
+
+        /*
+         * R
+         */
+        cardSequence:
+          row[17] || ''
+
+      };
+
+    }
+
+  }
+
+
+  /*
+   * CARD NOT FOUND
+   */
+
+  return {
+
+    found: false,
+
+    cardNumber:
+      wantedCard
+
+  };
+
+}
+
+
+/*******************************************************
+ * LOCATE CARD - SAFE SEARCH VERSION
+ *******************************************************/
+
+function searchCardLocation(cardNumber) {
+
+  return locateCard(cardNumber);
+
+}
+
+
+/*******************************************************
+ * LOCATE CARD - CHECK ONLY
+ *******************************************************/
+
+function cardExists(cardNumber) {
+
+  const number =
+    normalizeCardNumber_(cardNumber);
+
+
+  if (
+    !/^\d{16}$/.test(number)
+  ) {
+
+    return false;
+
+  }
+
+
+  const result =
+    locateCard(number);
+
+
+  return result.found === true;
+
+}
+
+
+/*******************************************************
+ * LOCATE CARD - FORMAT RESULT
+ *******************************************************/
+
+function getLocateCardDisplayNumber(cardNumber) {
+
+  return formatCardNumber_(
+    cardNumber
+  );
+
+}
+
+
+/*******************************************************
+ * GET STORE DASHBOARD URL
+ *******************************************************/
+
+function getDashboardUrl() {
+
+  return ScriptApp
+    .getService()
+    .getUrl();
+
+}
+
+
+/*******************************************************
+ * GET RELEASE CARD URL
+ *
+ * TEMPORARY NAVIGATION FUNCTION
+ *
+ * We are not building Release Card yet.
+ *******************************************************/
+
+function getReleaseCardUrl() {
+
+  return ScriptApp
+    .getService()
+    .getUrl();
+
+}
+
+
+/*******************************************************
+ * GET LOCATE CARD URL
+ *******************************************************/
+
+function getLocateCardUrl() {
+
+  const baseUrl =
+    ScriptApp
+      .getService()
+      .getUrl();
+
+  return baseUrl +
+    '?page=locate';
+
+}
