@@ -1,0 +1,1851 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>LBC-RPC PORTAL - Release Card</title>
+
+
+  <style>
+
+
+    * {
+      box-sizing: border-box;
+    }
+
+
+    body {
+
+      margin: 0;
+
+      font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+      background: #f4f7fb;
+
+      color: #1f2937;
+
+    }
+
+
+    /* =====================================================
+       HEADER
+       ===================================================== */
+
+    .header {
+
+      background: #0878c9;
+
+      color: white;
+
+      padding: 16px 24px;
+
+      display: flex;
+
+      align-items: center;
+
+      justify-content: space-between;
+
+      box-shadow:
+        0 2px 8px rgba(0,0,0,0.15);
+
+    }
+
+
+    .brand {
+
+      display: flex;
+
+      align-items: center;
+
+      gap: 14px;
+
+    }
+
+
+    .logo {
+
+      width: 55px;
+
+      height: 55px;
+
+      border-radius: 10px;
+
+      object-fit: contain;
+
+      background: white;
+
+      padding: 4px;
+
+      display: none;
+
+    }
+
+
+    .title {
+
+      font-size: 24px;
+
+      font-weight: 700;
+
+      letter-spacing: .4px;
+
+    }
+
+
+    .subtitle {
+
+      font-size: 13px;
+
+      margin-top: 3px;
+
+      opacity: .9;
+
+    }
+
+
+    .header-badge {
+
+      font-size: 11px;
+
+      font-weight: 700;
+
+      padding: 7px 10px;
+
+      border: 1px solid rgba(255,255,255,0.45);
+
+      border-radius: 20px;
+
+      white-space: nowrap;
+
+      background: rgba(255,255,255,0.15);
+
+    }
+
+
+    /* =====================================================
+       CONTAINER
+       ===================================================== */
+
+    .container {
+
+      width: 100%;
+
+      max-width: 1200px;
+
+      margin: auto;
+
+      padding: 25px;
+
+    }
+
+
+    .page-title {
+
+      margin-bottom: 20px;
+
+    }
+
+
+    .page-title h1 {
+
+      margin: 0;
+
+      font-size: 24px;
+
+    }
+
+
+    .page-title p {
+
+      margin: 7px 0 0;
+
+      color: #6b7280;
+
+      font-size: 14px;
+
+    }
+
+
+    /* =====================================================
+       PANEL
+       ===================================================== */
+
+    .panel {
+
+      background: white;
+
+      border:
+        1px solid #e1e8ef;
+
+      border-radius: 12px;
+
+      padding: 25px;
+
+      margin-bottom: 20px;
+
+      box-shadow:
+        0 3px 10px rgba(0,0,0,.05);
+
+    }
+
+
+    .panel-title {
+
+      font-size: 17px;
+
+      font-weight: 700;
+
+      color: #0878c9;
+
+      margin-bottom: 20px;
+
+      padding-bottom: 10px;
+
+      border-bottom:
+        1px solid #edf1f5;
+
+    }
+
+
+    /* =====================================================
+       FORM
+       ===================================================== */
+
+    .form-grid {
+
+      display: grid;
+
+      grid-template-columns:
+        repeat(2, 1fr);
+
+      gap: 18px;
+
+    }
+
+
+    .form-group {
+
+      display: flex;
+
+      flex-direction: column;
+
+    }
+
+
+    .form-group.full {
+
+      grid-column:
+        1 / -1;
+
+    }
+
+
+    label {
+
+      font-size: 13px;
+
+      font-weight: 600;
+
+      margin-bottom: 7px;
+
+      color: #374151;
+
+    }
+
+
+    input,
+    select,
+    textarea {
+
+      width: 100%;
+
+      height: 44px;
+
+      border:
+        1px solid #cfd8e3;
+
+      border-radius: 7px;
+
+      padding:
+        0 12px;
+
+      font-size: 14px;
+
+      background: white;
+
+      outline: none;
+
+    }
+
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+
+      border-color: #0878c9;
+
+      box-shadow:
+        0 0 0 2px
+        rgba(8,120,201,.10);
+
+    }
+
+
+    textarea {
+
+      min-height: 90px;
+
+      resize: vertical;
+
+      height: auto;
+
+    }
+
+
+    .card-number-input {
+
+      font-size: 20px;
+
+      font-weight: 700;
+
+      letter-spacing: 2px;
+
+      text-align: center;
+
+    }
+
+
+    .input-help {
+
+      margin-top: 8px;
+
+      color: #6b7280;
+
+      font-size: 12px;
+
+    }
+
+
+    /* =====================================================
+       VALUE DISPLAY
+       ===================================================== */
+
+    .value {
+
+      background: #f5f7fa;
+
+      border:
+        1px solid #e1e8ef;
+
+      border-radius: 7px;
+
+      padding: 11px 12px;
+
+      min-height: 42px;
+
+      word-break: break-word;
+
+      font-size: 14px;
+
+      color: #1f2937;
+
+    }
+
+
+    /* =====================================================
+       STATUS BADGE
+       ===================================================== */
+
+    .status-badge {
+
+      display: inline-block;
+
+      padding: 5px 10px;
+
+      border-radius: 20px;
+
+      font-size: 10px;
+
+      font-weight: 700;
+
+    }
+
+
+    .status-badge.reported {
+
+      background: #e8f5ec;
+
+      color: #168a4a;
+
+    }
+
+
+    .status-badge.released {
+
+      background: #e8f7ee;
+
+      color: #168a4a;
+
+    }
+
+
+    .status-badge.blocked {
+
+      background: #fff0f0;
+
+      color: #dc3545;
+
+    }
+
+
+    /* =====================================================
+       BUTTONS
+       ===================================================== */
+
+    .button {
+
+      border: none;
+
+      border-radius: 7px;
+
+      padding: 12px 18px;
+
+      font-size: 14px;
+
+      font-weight: 600;
+
+      cursor: pointer;
+
+    }
+
+
+    .button-primary {
+
+      background: #0878c9;
+
+      color: white;
+
+    }
+
+
+    .button-primary:hover {
+
+      background: #066aaa;
+
+    }
+
+
+    .button-primary:disabled {
+
+      opacity: 0.55;
+
+      cursor: not-allowed;
+
+    }
+
+
+    .button-secondary {
+
+      background: #eef3f7;
+
+      color: #334155;
+
+    }
+
+
+    .button-secondary:hover {
+
+      background: #e1e8ef;
+
+    }
+
+
+    .button-danger {
+
+      background: #dc3545;
+
+      color: white;
+
+    }
+
+
+    .button-danger:hover {
+
+      background: #bb2d3b;
+
+    }
+
+
+    .button-row {
+
+      display: flex;
+
+      gap: 10px;
+
+      margin-top: 15px;
+
+      flex-wrap: wrap;
+
+    }
+
+
+    /* =====================================================
+       MESSAGE
+       ===================================================== */
+
+    .message {
+
+      padding: 18px;
+
+      border-radius: 10px;
+
+      margin-bottom: 20px;
+
+      white-space: pre-line;
+
+      display: none;
+
+      font-size: 13px;
+
+      line-height: 1.4;
+
+    }
+
+
+    .message.error {
+
+      display: block;
+
+      background: #fff1f2;
+
+      border:
+        1px solid #fecdd3;
+
+      color: #9f1239;
+
+    }
+
+
+    .message.success {
+
+      display: block;
+
+      background: #ecfdf3;
+
+      border:
+        1px solid #a7e8c3;
+
+      color: #166534;
+
+    }
+
+
+    .message.info {
+
+      display: block;
+
+      background: #f2f6fa;
+
+      border:
+        1px solid #d4dfe8;
+
+      color: #445b6b;
+
+    }
+
+
+    /* =====================================================
+       RESULT BOX
+       ===================================================== */
+
+    .result-box {
+
+      background: #f7fafc;
+
+      border:
+        1px solid #edf1f5;
+
+      border-radius: 10px;
+
+      padding: 15px;
+
+      margin-top: 15px;
+
+    }
+
+
+    .big-card-number {
+
+      font-size: 22px;
+
+      font-weight: 700;
+
+      letter-spacing: 1px;
+
+      color: #0878c9;
+
+      margin-bottom: 10px;
+
+      text-align: center;
+
+    }
+
+
+    /* =====================================================
+       SUCCESS SECTION
+       ===================================================== */
+
+    .release-success {
+
+      text-align: center;
+
+      padding: 18px;
+
+    }
+
+
+    .check {
+
+      font-size: 42px;
+
+      margin-bottom: 5px;
+
+      color: #168a4a;
+
+    }
+
+
+    .success-title {
+
+      font-size: 20px;
+
+      font-weight: 700;
+
+      color: #168a4a;
+
+      margin-bottom: 15px;
+
+    }
+
+
+    /* =====================================================
+       FOOTER
+       ===================================================== */
+
+    footer {
+
+      text-align: center;
+
+      padding: 25px;
+
+      color: #7b8794;
+
+      font-size: 12px;
+
+    }
+
+
+    /* =====================================================
+       HIDDEN
+       ===================================================== */
+
+    .hidden {
+
+      display: none !important;
+
+    }
+
+
+    /* =====================================================
+       MOBILE
+       ===================================================== */
+
+    @media screen and (max-width: 800px) {
+
+      body {
+
+        font-size: 16px;
+
+        background: #f4f7fb;
+
+      }
+
+
+      /* HEADER */
+
+      .header {
+
+        padding: 14px 16px;
+
+      }
+
+
+      .brand {
+
+        gap: 11px;
+
+      }
+
+
+      .logo {
+
+        width: 48px;
+
+        height: 48px;
+
+      }
+
+
+      .title {
+
+        font-size: 20px;
+
+        line-height: 1.25;
+
+      }
+
+
+      .subtitle {
+
+        font-size: 13px;
+
+        margin-top: 4px;
+
+      }
+
+
+      .header-badge {
+
+        font-size: 9px;
+
+        padding: 5px 7px;
+
+      }
+
+
+      /* CONTAINER */
+
+      .container {
+
+        width: 100%;
+
+        max-width: 100%;
+
+        padding: 18px 14px;
+
+      }
+
+
+      /* PAGE TITLE */
+
+      .page-title {
+
+        margin-bottom: 18px;
+
+      }
+
+
+      .page-title h1 {
+
+        font-size: 24px;
+
+        line-height: 1.25;
+
+      }
+
+
+      .page-title p {
+
+        font-size: 15px;
+
+        line-height: 1.5;
+
+      }
+
+
+      /* PANELS */
+
+      .panel {
+
+        width: 100%;
+
+        padding: 18px 15px;
+
+        margin-bottom: 18px;
+
+        border-radius: 12px;
+
+      }
+
+
+      .panel-title {
+
+        font-size: 18px;
+
+        line-height: 1.35;
+
+        margin-bottom: 18px;
+
+        padding-bottom: 11px;
+
+      }
+
+
+      /* STRICT ONE COLUMN */
+
+      .form-grid {
+
+        display: grid !important;
+
+        grid-template-columns: 1fr !important;
+
+        gap: 16px !important;
+
+        width: 100%;
+
+      }
+
+
+      .form-group {
+
+        width: 100%;
+
+        display: flex;
+
+        flex-direction: column;
+
+      }
+
+
+      .form-group.full {
+
+        grid-column: auto !important;
+
+      }
+
+
+      /* LABELS */
+
+      label {
+
+        font-size: 16px;
+
+        line-height: 1.4;
+
+        font-weight: 700;
+
+        margin-bottom: 8px;
+
+        color: #263342;
+
+      }
+
+
+      /* INPUTS */
+
+      input,
+      select,
+      textarea {
+
+        width: 94%;
+
+        max-width: 94%;
+
+        height: 50px;
+
+        padding: 0 13px;
+
+        font-size: 16px;
+
+        line-height: 1.4;
+
+        border-radius: 8px;
+
+        border: 1px solid #c7d2de;
+
+      }
+
+
+      textarea {
+
+        height: auto;
+
+        min-height: 80px;
+
+      }
+
+
+      /* CARD NUMBER INPUT */
+
+      .card-number-input {
+
+        width: 94%;
+
+        max-width: 94%;
+
+        height: 54px;
+
+        font-size: 19px;
+
+        font-weight: 700;
+
+        letter-spacing: 2px;
+
+        text-align: center;
+
+      }
+
+
+      /* BUTTONS */
+
+      .button {
+
+        min-height: 50px;
+
+        padding: 12px 16px;
+
+        font-size: 15px;
+
+        line-height: 1.3;
+
+        border-radius: 8px;
+
+      }
+
+
+      .button-row {
+
+        display: grid;
+
+        grid-template-columns: 1fr;
+
+        gap: 10px;
+
+        width: 94%;
+
+        margin: 16px auto 0;
+
+      }
+
+
+      .button-row .button {
+
+        width: 100%;
+
+      }
+
+
+      /* CARD NUMBER DISPLAY */
+
+      .big-card-number {
+
+        font-size: 18px;
+
+      }
+
+
+      /* VALUE */
+
+      .value {
+
+        font-size: 15px;
+
+        line-height: 1.55;
+
+      }
+
+
+      /* MESSAGE */
+
+      .message {
+
+        width: 100%;
+
+        padding: 16px;
+
+        font-size: 15px;
+
+        line-height: 1.55;
+
+      }
+
+
+      /* FOOTER */
+
+      footer {
+
+        padding: 22px 15px;
+
+        font-size: 13px;
+
+      }
+
+    }
+
+
+    /* =====================================================
+       VERY SMALL PHONES
+       ===================================================== */
+
+    @media screen and (max-width: 380px) {
+
+      .container {
+
+        padding: 15px 11px;
+
+      }
+
+
+      .panel {
+
+        padding: 16px 13px;
+
+      }
+
+
+      .title {
+
+        font-size: 18px;
+
+      }
+
+
+      .page-title h1 {
+
+        font-size: 22px;
+
+      }
+
+
+      label {
+
+        font-size: 15px;
+
+      }
+
+
+      input,
+      select,
+      textarea {
+
+        width: 92%;
+
+        max-width: 92%;
+
+        font-size: 16px;
+
+      }
+
+
+      .button {
+
+        font-size: 14px;
+
+      }
+
+
+      .card-number-input {
+
+        font-size: 17px;
+
+      }
+
+
+      .big-card-number {
+
+        font-size: 17px;
+
+      }
+
+    }
+
+  </style>
+</head>
+
+
+<body>
+
+
+<!-- =====================================================
+     HEADER
+     ===================================================== -->
+
+<header class="header">
+
+  <div class="brand">
+
+    <img
+      id="logo"
+      class="logo"
+      alt="Company Logo"
+    >
+
+    <div>
+
+      <div class="title">
+        LBC-RPC PORTAL
+      </div>
+
+      <div class="subtitle">
+        Release Card
+      </div>
+
+    </div>
+
+  </div>
+
+  <div class="header-badge">
+    RELEASE CARD
+  </div>
+
+</header>
+
+
+<!-- =====================================================
+     MAIN
+     ===================================================== -->
+
+<main class="container">
+
+
+  <!-- PAGE TITLE -->
+
+  <div class="page-title">
+
+    <h1>
+      Release Card
+    </h1>
+
+    <p>
+      Search and release a card from custody. Update card status and create history records.
+    </p>
+
+  </div>
+
+
+  <!-- MESSAGE -->
+
+  <div
+    id="message"
+    class="message"
+  ></div>
+
+
+  <!-- =====================================================
+       SEARCH CARD
+       ===================================================== -->
+
+  <div class="panel">
+
+    <div class="panel-title">
+      SEARCH CARD
+    </div>
+
+
+    <div class="form-grid">
+
+      <div class="form-group full">
+
+        <label
+          for="cardNumber"
+        >
+          16-Digit Card Number
+        </label>
+
+        <input
+          id="cardNumber"
+          class="card-number-input"
+          type="text"
+          inputmode="numeric"
+          autocomplete="off"
+          maxlength="19"
+          placeholder="XXXX XXXX XXXX XXXX"
+          oninput="formatInputCard(this)"
+          onkeydown="if(event.key==='Enter') searchCard()"
+        >
+
+        <div class="input-help">
+          Enter the complete 16-digit card number. Spaces are allowed.
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div class="button-row">
+
+      <button
+        id="searchBtn"
+        class="button button-primary"
+        onclick="searchCard()"
+      >
+        SEARCH CARD
+      </button>
+
+      <button
+        class="button button-secondary"
+        onclick="clearPage()"
+      >
+        CLEAR
+      </button>
+
+      <button
+        class="button button-secondary"
+        onclick="goDashboard()"
+      >
+        DASHBOARD
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <!-- =====================================================
+       CARD INFORMATION
+       ===================================================== -->
+
+  <div
+    id="cardSection"
+    class="panel hidden"
+  >
+
+    <div class="panel-title">
+      CARD INFORMATION
+    </div>
+
+
+    <div class="result-box">
+
+      <div
+        id="displayCardNumber"
+        class="big-card-number"
+      ></div>
+
+
+      <div class="form-grid">
+
+        <div class="form-group">
+
+          <label>Current Status</label>
+
+          <div
+            id="statusValue"
+            class="value"
+          ></div>
+
+        </div>
+
+        <div class="form-group">
+
+          <label>Original Report ID</label>
+
+          <div
+            id="reportIdValue"
+            class="value"
+          ></div>
+
+        </div>
+
+        <div class="form-group">
+
+          <label>Store Code</label>
+
+          <div
+            id="storeCodeValue"
+            class="value"
+          ></div>
+
+        </div>
+
+        <div class="form-group">
+
+          <label>Store / Hub Name</label>
+
+          <div
+            id="storeNameValue"
+            class="value"
+          ></div>
+
+        </div>
+
+        <div class="form-group">
+
+          <label>Area</label>
+
+          <div
+            id="areaValue"
+            class="value"
+          ></div>
+
+        </div>
+
+        <div class="form-group">
+
+          <label>Original Processor</label>
+
+          <div
+            id="processorValue"
+            class="value"
+          ></div>
+
+        </div>
+
+        <div class="form-group">
+
+          <label>Turn-over Type</label>
+
+          <div
+            id="turnoverTypeValue"
+            class="value"
+          ></div>
+
+        </div>
+
+        <div class="form-group">
+
+          <label>Turn-over Location</label>
+
+          <div
+            id="turnoverLocationValue"
+            class="value"
+          ></div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- =====================================================
+       RELEASE INFORMATION
+       ===================================================== -->
+
+  <div
+    id="releaseSection"
+    class="panel hidden"
+  >
+
+    <div class="panel-title">
+      RELEASE INFORMATION
+    </div>
+
+
+    <div class="form-grid">
+
+      <div class="form-group full">
+
+        <label
+          for="processorUser"
+        >
+          Processor / User
+          <span style="color: #dc2626;">*</span>
+        </label>
+
+        <input
+          id="processorUser"
+          type="text"
+          autocomplete="off"
+          placeholder="Enter processor / releasing user"
+        >
+
+      </div>
+
+      <div class="form-group full">
+
+        <label
+          for="releasedTo"
+        >
+          Released To
+          <span style="color: #dc2626;">*</span>
+        </label>
+
+        <input
+          id="releasedTo"
+          type="text"
+          autocomplete="off"
+          placeholder="Enter person / recipient who received the card"
+        >
+
+      </div>
+
+      <div class="form-group full">
+
+        <label
+          for="remarks"
+        >
+          Remarks
+        </label>
+
+        <textarea
+          id="remarks"
+          placeholder="Optional release remarks"
+        ></textarea>
+
+      </div>
+
+    </div>
+
+
+    <div class="button-row">
+
+      <button
+        id="releaseBtn"
+        class="button button-primary"
+        onclick="releaseCard()"
+      >
+        RELEASE CARD
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <!-- =====================================================
+       SUCCESS SECTION
+       ===================================================== -->
+
+  <div
+    id="successSection"
+    class="panel hidden"
+  >
+
+    <div class="release-success">
+
+      <div class="check">✓</div>
+
+      <div class="success-title">
+        CARD RELEASED SUCCESSFULLY
+      </div>
+
+
+      <div class="form-grid">
+
+        <div class="form-group">
+
+          <label>Card Number</label>
+
+          <div
+            id="successCard"
+            class="value"
+          ></div>
+
+        </div>
+
+        <div class="form-group">
+
+          <label>Status</label>
+
+          <div
+            id="successStatus"
+            class="value"
+          ></div>
+
+        </div>
+
+        <div class="form-group">
+
+          <label>Release Report ID</label>
+
+          <div
+            id="successReleaseId"
+            class="value"
+          ></div>
+
+        </div>
+
+        <div class="form-group">
+
+          <label>History ID</label>
+
+          <div
+            id="successHistoryId"
+            class="value"
+          ></div>
+
+        </div>
+
+        <div class="form-group">
+
+          <label>Released To</label>
+
+          <div
+            id="successReleasedTo"
+            class="value"
+          ></div>
+
+        </div>
+
+        <div class="form-group">
+
+          <label>Event Date / Time</label>
+
+          <div
+            id="successDate"
+            class="value"
+          ></div>
+
+        </div>
+
+      </div>
+
+
+      <div class="button-row">
+
+        <button
+          class="button button-primary"
+          onclick="clearPage()"
+        >
+          RELEASE ANOTHER CARD
+        </button>
+
+        <button
+          class="button button-secondary"
+          onclick="goDashboard()"
+        >
+          DASHBOARD
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+</main>
+
+
+<!-- =====================================================
+     FOOTER
+     ===================================================== -->
+
+<footer
+  id="footer"
+>
+  Develop by JMP 2026
+</footer>
+
+
+<script>
+  let currentCard = null;
+
+
+  function showMessage(text, type) {
+    const el = document.getElementById('message');
+    el.className = 'message ' + (type || 'info');
+    el.textContent = text;
+  }
+
+
+  function hideMessage() {
+    const el = document.getElementById('message');
+    el.className = 'message';
+    el.textContent = '';
+  }
+
+
+  function digitsOnly(value) {
+    return String(value || '').replace(/\D/g, '').substring(0, 16);
+  }
+
+
+  function formatCard(value) {
+    return digitsOnly(value).replace(/(\d{4})(?=\d)/g, '$1 ');
+  }
+
+
+  function formatInputCard(input) {
+    input.value = formatCard(input.value);
+  }
+
+
+  function setText(id, value) {
+    document.getElementById(id).textContent = value || '';
+  }
+
+
+  function searchCard() {
+    hideMessage();
+
+
+    const number = digitsOnly(document.getElementById('cardNumber').value);
+
+
+    if (!/^\d{16}$/.test(number)) {
+      showMessage('Please enter exactly 16 digits.', 'error');
+      return;
+    }
+
+
+    const btn = document.getElementById('searchBtn');
+    btn.disabled = true;
+    btn.textContent = 'SEARCHING...';
+
+
+    google.script.run
+      .withSuccessHandler(function(result) {
+        btn.disabled = false;
+        btn.textContent = 'SEARCH CARD';
+
+
+        if (!result || !result.found) {
+          currentCard = null;
+          document.getElementById('cardSection').classList.add('hidden');
+          document.getElementById('releaseSection').classList.add('hidden');
+          showMessage(
+            'CARD NOT FOUND:\n\n' + formatCard(number),
+            'error'
+          );
+          return;
+        }
+
+
+        currentCard = result;
+        displayCard(result);
+      })
+      .withFailureHandler(function(error) {
+        btn.disabled = false;
+        btn.textContent = 'SEARCH CARD';
+        showMessage(error && error.message ? error.message : String(error), 'error');
+      })
+      .getReleaseCardData(number);
+  }
+
+
+  function displayCard(card) {
+    document.getElementById('cardSection').classList.remove('hidden');
+    document.getElementById('successSection').classList.add('hidden');
+
+
+    setText('displayCardNumber', card.cardNumberDisplay);
+    setText('reportIdValue', card.uniqueId);
+    setText('storeCodeValue', card.storeCode);
+    setText('storeNameValue', card.storeName);
+    setText('areaValue', card.area);
+    setText('processorValue', card.processor);
+    setText('turnoverTypeValue', card.turnoverType);
+    setText('turnoverLocationValue', card.turnoverLocation);
+
+
+    const status = document.getElementById('statusValue');
+    status.textContent = card.status || '';
+    status.className = 'value';
+
+
+    const normalized = String(card.status || '').toUpperCase();
+
+
+    if (normalized === 'REPORTED') {
+      status.innerHTML = '<span class="status-badge reported">REPORTED</span>';
+      document.getElementById('releaseSection').classList.remove('hidden');
+      showMessage(
+        'Card found. The card is eligible for release.',
+        'info'
+      );
+    } else {
+      status.innerHTML =
+        '<span class="status-badge blocked">' +
+        escapeHtml(card.status || 'UNKNOWN') +
+        '</span>';
+
+
+      document.getElementById('releaseSection').classList.add('hidden');
+
+
+      showMessage(
+        'CARD CANNOT BE RELEASED.\n\n' +
+        'Current Status: ' + (card.status || 'UNKNOWN') +
+        '\n\nOnly cards with status REPORTED can be released.',
+        'error'
+      );
+    }
+  }
+
+
+  function releaseCard() {
+    hideMessage();
+
+
+    if (!currentCard || !currentCard.cardNumber) {
+      showMessage('Please search for a card first.', 'error');
+      return;
+    }
+
+
+    const processorUser =
+      document.getElementById('processorUser').value.trim();
+
+
+    const releasedTo =
+      document.getElementById('releasedTo').value.trim();
+
+
+    const remarks =
+      document.getElementById('remarks').value.trim();
+
+
+    if (!processorUser) {
+      showMessage('Processor / User is required.', 'error');
+      document.getElementById('processorUser').focus();
+      return;
+    }
+
+
+    if (!releasedTo) {
+      showMessage('Released To is required.', 'error');
+      document.getElementById('releasedTo').focus();
+      return;
+    }
+
+
+    if (String(currentCard.status || '').toUpperCase() !== 'REPORTED') {
+      showMessage('This card is no longer eligible for release.', 'error');
+      return;
+    }
+
+
+    const confirmed = confirm(
+      'RELEASE CARD?\n\n' +
+      'Card: ' + currentCard.cardNumberDisplay + '\n' +
+      'Released To: ' + releasedTo + '\n\n' +
+      'This action will change the card status to RELEASED and create a CARD HISTORY record.'
+    );
+
+
+    if (!confirmed) return;
+
+
+    const btn = document.getElementById('releaseBtn');
+    btn.disabled = true;
+    btn.textContent = 'RELEASING...';
+
+
+    google.script.run
+      .withSuccessHandler(function(result) {
+        btn.disabled = false;
+        btn.textContent = 'RELEASE CARD';
+
+
+        if (!result || !result.success) {
+          showMessage('Release was not completed.', 'error');
+          return;
+        }
+
+
+        showReleaseSuccess(result);
+      })
+      .withFailureHandler(function(error) {
+        btn.disabled = false;
+        btn.textContent = 'RELEASE CARD';
+        showMessage(error && error.message ? error.message : String(error), 'error');
+      })
+      .releaseCard({
+        cardNumber: currentCard.cardNumber,
+        processorUser: processorUser,
+        releasedTo: releasedTo,
+        remarks: remarks
+      });
+  }
+
+
+  function showReleaseSuccess(result) {
+    document.getElementById('cardSection').classList.add('hidden');
+    document.getElementById('releaseSection').classList.add('hidden');
+    document.getElementById('successSection').classList.remove('hidden');
+
+
+    setText('successCard', result.cardNumberDisplay);
+    setText('successStatus', result.status);
+    setText('successReleaseId', result.releaseReportId);
+    setText('successHistoryId', result.historyId);
+    setText('successReleasedTo', result.releasedTo);
+    setText('successDate', result.eventDateTime);
+
+
+    showMessage(
+      'Release completed successfully.\n\n' +
+      'The CARD DATABASE was updated and a CARD HISTORY record was created.',
+      'success'
+    );
+  }
+
+
+  function clearPage() {
+    currentCard = null;
+
+
+    document.getElementById('cardNumber').value = '';
+    document.getElementById('processorUser').value = '';
+    document.getElementById('releasedTo').value = '';
+    document.getElementById('remarks').value = '';
+
+
+    document.getElementById('cardSection').classList.add('hidden');
+    document.getElementById('releaseSection').classList.add('hidden');
+    document.getElementById('successSection').classList.add('hidden');
+
+
+    hideMessage();
+    document.getElementById('cardNumber').focus();
+  }
+
+
+  function goDashboard() {
+    google.script.run
+      .withSuccessHandler(function(url) {
+        window.top.location.href = url;
+      })
+      .getDashboardUrl();
+  }
+
+
+  function escapeHtml(value) {
+    return String(value || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+
+  function loadPortalData() {
+    google.script.run
+      .withSuccessHandler(function(data) {
+        if (!data) return;
+
+
+        if (data.logoUrl) {
+          const logo = document.getElementById('logo');
+          logo.src = data.logoUrl;
+          logo.style.display = 'block';
+        }
+      })
+      .withFailureHandler(function(error) {
+        console.log(
+          'Portal data error:',
+          error
+        );
+      })
+      .getPortalData();
+  }
+
+
+  document.addEventListener('DOMContentLoaded', function() {
+    loadPortalData();
+    document.getElementById('cardNumber').focus();
+  });
+</script>
+
+
+</body>
+</html>
